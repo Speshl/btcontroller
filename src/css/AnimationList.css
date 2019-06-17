@@ -1,0 +1,29 @@
+.animationListMainDiv{
+    margin-top: 5px;
+    border-top: 3px dashed whitesmoke
+}
+
+.animationListMainDiv label {
+    vertical-align: middle;
+}
+
+.radioLabel {
+    margin-right: 30px;
+}
+
+.textLabel{
+    float: right;
+    display: none;
+}
+
+.animationListMainDiv input[type="radio"]{
+    vertical-align: middle;
+    margin: 0px 3px 0px 5px;
+}
+
+.animationListMainDiv input[type="text"]{
+    width: 50px;
+    margin-right: 5px;
+    background: black;
+    color: whitesmoke;
+}

@@ -1,0 +1,41 @@
+.sketch-picker {
+    background-color: black !important;
+    margin: auto;
+    margin-bottom: 5px;
+}
+
+.sketch-picker input {
+    background-color: black;
+    color: whitesmoke;
+}
+
+.sketch-picker span {
+    color: darkgray !important;
+}
+
+.circle-picker {
+    padding: 5px;
+}
+
+.circlePickerDiv {
+    margin: auto;
+    width: fit-content;
+    margin-bottom: 5px;
+}
+
+.colorListMainDiv {
+    display: block;
+    text-align: center;
+    margin: auto;
+    width: fit-content;
+    min-width: 300px;
+}
+
+.colorListMainDiv button {
+    margin: 5px;
+    min-width: 60px;
+}
+
+.selectedColor {
+    box-shadow: rgb(255, 255, 255) 0px 0px 0px 3px inset;
+}

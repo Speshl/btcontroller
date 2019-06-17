@@ -1,0 +1,15 @@
+.writeListMainDiv{
+    margin-top: 5px;
+    border-top: 3px dashed whitesmoke
+}
+
+.writeListMainDiv button {
+    width: 275px;
+    margin: auto;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.buttonDisabled {
+    background: gray;
+}

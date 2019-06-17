@@ -1,0 +1,26 @@
+body{
+    background-color: black;
+    color: whitesmoke;
+}
+
+h2 {
+    margin-block-start: 0px;
+    margin-block-end: 5px;
+    border-bottom: 3px solid;
+    border-color: inherit;
+    text-align: center
+}
+
+h3 {
+    margin-block-start: 0px;
+    margin-block-end: 5px;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+button {
+    background-color: black;
+    color: whitesmoke;
+    cursor: pointer;
+}
