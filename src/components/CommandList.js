@@ -20,7 +20,7 @@ export class CommandList extends Component {
     addCommandToList = () => {
         if(this.props.state.selectedColor != null && this.props.state.selectedAnimation != null && this.props.state.selectedDelay != null)
         {
-            if(this.props.state.commandList.length <= 20){
+            if(this.props.state.commandList.length < 10){
                 let command = {
                     color: this.props.state.selectedColor,
                     animation: this.props.state.selectedAnimation,
@@ -29,7 +29,7 @@ export class CommandList extends Component {
                 let newCommandList = this.props.state.commandList.concat([command]);
                 this.props.stateUpdaters.updateCommandList(newCommandList);
             }else{
-                alert("Limit of 20 commands.");
+                alert("Limit of 10 commands.");
             }
         }else{
             alert("Please select a color, animation, and delay");

@@ -78,11 +78,14 @@ export default class BlueToothCommands {
             if(i > 0){
                 builtString += "|"; //add command delimiter
             }
-            builtString += commandList[i].color.substring(1,3);
+            let red = parseInt(commandList[i].color.substring(1,3), 16);
+            let green = parseInt(commandList[i].color.substring(3,5), 16);
+            let blue = parseInt(commandList[i].color.substring(5,7), 16);
+            builtString += red
             builtString += ",";
-            builtString += commandList[i].color.substring(3,5);
+            builtString += green
             builtString += ",";
-            builtString += commandList[i].color.substring(5,7);
+            builtString += blue
             builtString += ",";
             builtString += commandList[i].animation.substring(0,1);
             builtString += ",";
