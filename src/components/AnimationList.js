@@ -120,11 +120,11 @@ export class AnimationList extends Component {
                 </div>
                 <div>
                     <label className="radioLabel"><input type="radio" name="animation" value="Pulse" onClick={this.radioClicked}/>Pulse</label>
-                    <label className="textLabel" style={this.getPulseDelayStyle()}>Delay (ms):<input type="text" name="pulseDelay" ref={this.pulseDelayRef} defaultValue="100" maxLength="5" onKeyPress={this.updateDelay}/></label>
+                    <label className="textLabel" style={this.getPulseDelayStyle()}>Delay (ms):<input type="text" name="pulseDelay" ref={this.pulseDelayRef} defaultValue="255" maxLength="5" onKeyPress={this.updateDelay}/></label>
                 </div>
                 <div>
                     <label className="radioLabel"><input type="radio" name="animation" value="Fade" onClick={this.radioClicked}/>Fade</label>
-                    <label className="textLabel" style={this.getFadeDelayStyle()}>Delay (ms):<input type="text" name="fadeDelay" ref={this.fadeDelayRef} defaultValue="100" maxLength="5" onKeyPress={this.updateDelay}/></label>
+                    <label className="textLabel" style={this.getFadeDelayStyle()}>Delay (ms):<input type="text" name="fadeDelay" ref={this.fadeDelayRef} defaultValue="255" maxLength="5" onKeyPress={this.updateDelay}/></label>
                 </div>
             </div>
         )
