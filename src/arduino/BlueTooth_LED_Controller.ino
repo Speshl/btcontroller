@@ -1,9 +1,10 @@
 #include <SoftwareSerial.h>
+#include <EEPROM.h>
 
-#define REDPIN 9 //PWM
-#define GREENPIN 10 //PWM
-#define BLUEPIN 11 //PWM
-#define WHITEPIN 12 //PWM NEED TO CHECK PIN
+#define REDPIN 6 //PWM
+#define GREENPIN 9 //PWM
+#define BLUEPIN 10 //PWM
+#define WHITEPIN 11 //PWM NEED TO CHECK PIN
 
 struct command
 {
@@ -39,6 +40,8 @@ int currentDisplayedGreen = 0;
 int currentDisplayedBlue = 0;
 
 void setup() {
+  readEEPROM();
+  
   digitalWrite(REDPIN, LOW);
   digitalWrite(GREENPIN, LOW);
   digitalWrite(BLUEPIN, LOW);
@@ -88,12 +91,13 @@ void loop() {
   if (newCommand) {
     printNewCommands();
     updateCommands();
+    updateEEPROM();
     printCommands();
     newCommand = false;
     currentLightShowIndex = 0;
   }
 
-  //runCommand();
+  runCommand();
 }
 
 void runCommand() {
@@ -109,6 +113,9 @@ void runCommand() {
       break;
     case 'F':
       runFadeCommand();
+      break;
+    default:
+      debugMessage("Command doesn't have valid animation");
       break;
   }
 }
@@ -384,6 +391,24 @@ void printCommands() {
     Serial.print(commands[i].delay);
     Serial.print("\r\n");
   }
+}
+
+void updateEEPROM(){
+  int eeAddress = 0;
+  EEPROM.update(eeAddress, lightStatus);
+  eeAddress += sizeof(lightStatus);
+  EEPROM.update(eeAddress,commandIndex);
+  eeAddress += sizeof(commandIndex);
+  EEPROM.update(eeAddress, commands);
+}
+
+void readEEPROM(){
+  int eeAddress = 0;
+  EEPROM.get(eeAddress, lightStatus);
+  eeAddress += sizeof(lightStatus);
+  EEPROM.get(eeAddress,commandIndex);
+  eeAddress += sizeof(commandIndex);
+  EEPROM.get(eeAddress, commands);
 }
 
 void updateCommands() {
