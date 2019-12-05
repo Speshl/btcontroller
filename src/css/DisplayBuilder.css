@@ -10,3 +10,13 @@
     display: block;
     margin: auto;
 }
+
+.displayBuilderButton {
+    background: black;
+    color: whitesmoke;
+    margin: auto;
+    display: block;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    align-self: center;
+}

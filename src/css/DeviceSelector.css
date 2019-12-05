@@ -1,12 +1,13 @@
 .selectorMainDiv {
     margin: auto;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border: 3px solid;
     border-color: red;
     text-align: center;
     width: fit-content;
     min-width: 300px;
 }
+
 .selectorLabel {
     padding-right: 5px;
 }
@@ -15,6 +16,10 @@
     width: fit-content;
     text-align: left;
     margin: auto;
+}
+
+.saveButton{
+    margin: 5px;
 }
 
 .selectorButton {

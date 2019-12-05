@@ -5,72 +5,113 @@ import './../css/DeviceSelector.css';
 
 //this.props.selectedDevice
 class DeviceSelector extends Component {
+
   connect = async () => {
     try{
-      let device = await BlueToothCommands.connect(this.onDisconnected, this.onDataRecieved);
-      this.props.stateUpdaters.updateSelectedDevice(device);
-      return;
+      let device = await BlueToothCommands.connect(this.onDisconnected);
+      this.props.stateUpdaters.updateDeviceState(device, 1, true);
     }catch(e){
-      alert(e);
+      if(e.message.includes("User cancelled the requestDevice() chooser") === false){
+        alert(e);
+      }
     }
   }
 
   disconnect = async () => {
-    if(this.props.state.selectedDevice){
-      BlueToothCommands.disconnect(this.props.state.selectedDevice);
+    if(this.props.state.deviceState.connectionStatus === 2){
+      BlueToothCommands.disconnect(this.props.state.deviceState.selectedDevice);
     }
   }
 
   onDisconnected = () => {
-    this.props.stateUpdaters.updateSelectedDevice(null);
+    this.props.stateUpdaters.updateDeviceState(null, 0, true);
   }
 
-  onDataRecieved = (event) => {
-    let decodedValue = (new TextDecoder().decode(event.target.value)).trim();
-    if(decodedValue === "[true]"){
-      this.props.stateUpdaters.toggleOn(true);
-    }else if(decodedValue === '[false]'){
-      this.props.stateUpdaters.toggleOn(false);
+  load = async () => {
+    if(this.props.state.deviceState.connectionStatus === 1){
+      let data = await BlueToothCommands.load(this.props.state.deviceState.selectedDevice);
+      this.props.stateUpdaters.updateAllStates({server: this.props.state.deviceState.selectedDevice, data: data});
+    }
+  }
+
+  save = async () => {
+    if(this.props.state.selectedDevice){
+      BlueToothCommands.save(this.props.state.deviceState.selectedDevice);
+    }
+  }
+
+  toggleLightStatus = async () => {
+    if(this.props.state.deviceState.connectionStatus === 2){
+        let status = await BlueToothCommands.toggleLights(this.props.state.deviceState.selectedDevice, this.props.state.deviceState.lightsOn);
+        if(status){//success
+          this.props.stateUpdaters.updateDeviceState(
+            this.props.state.deviceState.selectedDevice,
+            this.props.state.deviceState.connectionStatus,
+            !this.props.state.deviceState.lightsOn
+          );
+        }
     }
   }
 
   getCurrentStatusBorderStyle = () => {
-    return{
-      borderColor: (BlueToothCommands.isConnected(this.props.state.selectedDevice)) ? "green" : "red"
+    if(this.props.state.deviceState.connectionStatus === 0){
+      return{
+        borderColor: "red"
+      }
+    }else if(this.props.state.deviceState.connectionStatus === 1){
+      return{
+        borderColor: "yellow"
+      }
+    }else if(this.props.state.deviceState.connectionStatus === 2){
+      return{
+        borderColor: "green"
+      }
     }
   }
 
   getCurrentStatusTextStyle = () => {
-    return{
-      color: (BlueToothCommands.isConnected(this.props.state.selectedDevice)) ? "green" : "red"
+    if(this.props.state.deviceState.connectionStatus === 0){
+      return{
+        color: "red"
+      }
+    }else if(this.props.state.deviceState.connectionStatus === 1){
+      return{
+        color: "yellow"
+      }
+    }else if(this.props.state.deviceState.connectionStatus === 2){
+      return{
+        color: "green"
+      }
     }
   }
 
   getCurrentStatusText = () => {
-    let status = "Disconnected";
-    if(BlueToothCommands.isConnected(this.props.state.selectedDevice)){
-      status = "Connected";
+    let status = "Status: ";
+    if(this.props.state.deviceState.connectionStatus === 0){
+      status += "Disconnected";
+    }else if(this.props.state.deviceState.connectionStatus === 1){
+      status += "Loading saved data...";
+    }else if(this.props.state.deviceState.connectionStatus === 2){
+      status += "Connected";
     }
     return status;
   }
 
-  toggleLightStatus = () => {
-    if(BlueToothCommands.isConnected(this.props.state.selectedDevice)){
-      if(this.props.state.lightsOn){
-        BlueToothCommands.sendBTCommand(this.props.state.selectedDevice, ')');//Send off command
-      }else{
-        BlueToothCommands.sendBTCommand(this.props.state.selectedDevice, '(');//Send on command
-      }
-    }
-  }
-
   getLightsToggleButton = () => {
-    if(BlueToothCommands.isConnected(this.props.state.selectedDevice)){
-      if(this.props.state.lightsOn){
+    if(this.props.state.deviceState.connectionStatus === 2){
+      if(this.props.state.deviceState.lightsOn){
         return <div><button className="lightsToggle" onClick={this.toggleLightStatus}>Toggle Lights Off</button></div>
       }else{
         return <div><button className="lightsToggle" onClick={this.toggleLightStatus}>Toggle Lights On</button></div>
       }
+    }
+  }
+
+  getSaveButton = () => {
+    if(this.props.state.deviceState.connectionStatus === 2){
+      return <React.Fragment>
+        <button className="saveButton" onClick={this.save}>Save CommandSet</button>
+      </React.Fragment>
     }
   }
 
@@ -82,18 +123,26 @@ class DeviceSelector extends Component {
         <button className="selectorButton" onClick={this.disconnect}>Disconnect Device</button>
         <div className="selectorLabelDiv">
           <div>
-            <label className="selectorLabel">Name: {(this.props.state.selectedDevice) ? this.props.state.selectedDevice.name : ""}</label>
+            <label className="selectorLabel">Name: {(this.props.state.deviceState.selectedDevice) ? this.props.state.deviceState.selectedDevice.device.name : ""}</label>
           </div>
           <div>
-            <label className="selectorLabel" style={this.getCurrentStatusTextStyle()}>Status: {this.getCurrentStatusText()}</label>
+            <label className="selectorLabel" style={this.getCurrentStatusTextStyle()}>{this.getCurrentStatusText()}</label>
+          </div>
+          <div>
+            {this.getSaveButton()}
           </div>
           {this.getLightsToggleButton()}
         </div>
       </div>
     );
   }
-}
 
+  componentDidUpdate = () => {
+    if(this.props.state.deviceState.connectionStatus === 1){
+      this.load();
+    }
+  }  
+}
 DeviceSelector.propTypes = {
   state: PropTypes.object.isRequired
 }

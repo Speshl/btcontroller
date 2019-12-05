@@ -1,0 +1,63 @@
+.channelSelectorMainDiv{
+    margin: auto;
+    border-bottom: 3px solid;
+    border-color: whitesmoke;
+    background: black;
+    color: whitesmoke;
+    text-align: center;
+    width: fit-content;
+    min-width: 300px;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+}
+
+.channelAddEditButton{
+    background: black;
+    color: whitesmoke;
+    margin-bottom: 5px;
+}
+
+.channelButton{
+    background: black;
+    color: whitesmoke;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.channelButtonSelected{
+    background: whitesmoke;
+    color: black;
+    margin-left: 4px;
+    margin-right: 4px;
+}
+
+.channelInput{
+    margin-bottom: 5px;
+}
+
+.channelPosition{
+    background: black;
+    color: whitesmoke;
+}
+
+.channelPositionSelectedUsed{
+    background: whitesmoke;
+    color: black;
+}
+
+.channelPositionSelectedNew{
+    background: yellow;
+    color: black;
+}
+
+.channelPositionDiv{
+    margin-bottom: 5px;
+}
+
+input[type="text"]{
+    max-width: 75px;
+}
+
+input[type="button" i]:disabled{
+    color:red;
+}

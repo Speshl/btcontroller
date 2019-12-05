@@ -1,27 +1,23 @@
 import React, { Component } from 'react';
 import ColorList from './ColorList';
 import AnimationList from './AnimationList';
-import CommandList from './CommandList';
-import WriteList from './WriteList';
+import ChannelSelector from './ChannelSelector';
+import BlueToothCommands from './../shared/BlueToothCommands';
 import './../css/DisplayBuilder.css';
 
 export class DisplayBuilder extends Component {
 
-    getModeToggleButton = () => {
-        if(this.props.state.displayMode === "Basic"){
-            return <button className="modeButton" onClick={this.props.stateUpdaters.toggleDisplayMode}>Advanced Mode</button>
-        }else if(this.props.state.displayMode === "Advanced"){
-            return <button className="modeButton" onClick={this.props.stateUpdaters.toggleDisplayMode}>Basic Mode</button>
-        }
-    }
-
-    determineAdvancedDisplay = () => {
-        if(this.props.state.displayMode === "Advanced"){
-            return <React.Fragment>
-                <AnimationList stateUpdaters={this.props.stateUpdaters} />
-                <CommandList state={this.props.state} stateUpdaters={this.props.stateUpdaters} />
-                <WriteList state={this.props.state} />
-            </React.Fragment>
+    writeToDevice = async (e) => {
+        try{
+            BlueToothCommands.updateCommand(
+                this.props.state.deviceState.selectedDevice,
+                this.props.state.primaryColorState,
+                this.props.state.secondaryColorState,
+                this.props.state.commandState,
+                this.props.state.channelState.selectedChannelList
+            );
+        }catch(err){
+            console.log(err);
         }
     }
 
@@ -29,9 +25,13 @@ export class DisplayBuilder extends Component {
         return (
             <div className="displayBuilderMainDiv">
                 <h2>Display Builder</h2>
-                {this.getModeToggleButton()}
-                <ColorList state={this.props.state} stateUpdaters={this.props.stateUpdaters} />
-                {this.determineAdvancedDisplay()}
+                <ChannelSelector state={this.props.state} stateUpdaters={this.props.stateUpdaters} />
+                <ColorList state={this.props.state} stateUpdaters={this.props.stateUpdaters} type="primary"/>
+                <ColorList state={this.props.state} stateUpdaters={this.props.stateUpdaters} type="secondary"/>
+                <AnimationList state={this.props.state} stateUpdaters={this.props.stateUpdaters}/>
+                <div>
+                    <input className="displayBuilderButton" type="button" value="Write To Device" onClick={this.writeToDevice}/>
+                </div>
             </div>
         )
     }

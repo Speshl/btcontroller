@@ -1,137 +1,60 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 import './../css/AnimationList.css';
 
-var showStaticDelay = true;
-var showBlinkDelay = false;
-var showPulseDelay = false;
-var showFadeDelay = false;
+const animations = [
+    "Static",
+    "Blink",
+    "Pulse"/*,
+    "Wave (L2R)",
+    "Wave (R2L)",
+    "Wave (F2B)",
+    "Wave (B2F)",
+    "Stack (F2B)",
+    "Stack (B2F)",
+    "RGB Flow"*/
+];
 
 export class AnimationList extends Component {
 
-    constructor(props){
-        super(props);
-        this.staticRadioRef = React.createRef();
-        this.staticDelayRef = React.createRef();
-        this.blinkDelayRef = React.createRef();
-        this.pulseDelayRef = React.createRef();
-        this.fadeDelayRef = React.createRef();
-    }
-
-    radioClicked = (e) => {
-        let relatedTextInput = null;
-        showStaticDelay = false;
-        showBlinkDelay = false;
-        showPulseDelay = false;
-        showFadeDelay = false;
-        switch(e.target.value){
-            case "Static":
-                showStaticDelay = true;
-                relatedTextInput = this.staticDelayRef.current;
-                break;
-            case "Blink":
-                showBlinkDelay = true;
-                relatedTextInput = this.blinkDelayRef.current;
-                break;
-            case "Pulse":
-                showPulseDelay = true;
-                relatedTextInput = this.pulseDelayRef.current;
-                break;
-            case "Fade":
-                showFadeDelay = true;
-                relatedTextInput = this.fadeDelayRef.current;
-                break;
-            default:
-                break;
-        }
-        this.props.stateUpdaters.updateSelectedAnimation(e.target.value);
-        if(relatedTextInput){
-            this.props.stateUpdaters.updateSelectedDelay(relatedTextInput.value);
-        }
-        //this.forceUpdate();
-    }
-
-    updateDelay = (e) =>{
-        this.props.stateUpdaters.updateSelectedDelay(e.target.value);
-    }
-
-    getStaticDelayStyle = () => {
-        if(showStaticDelay){
-            return {
-                display: 'unset'
-            }
-        }else{
-            return {
-                display: 'none'
-            }
+    switchAnimation = (e) => {
+        let index = animations.indexOf(e.target.value);
+        if(index > -1){
+            this.props.stateUpdaters.updateCommandState(index, this.props.state.commandState.delay);
         }
     }
 
-    getBlinkDelayStyle = () => {
-        if(showBlinkDelay){
-            return {
-                display: 'unset'
-            }
-        }else{
-            return {
-                display: 'none'
-            }
-        }
+    getSelectedAnimation = () => {
+        return animations[this.props.state.commandState.animation];
     }
 
-    getPulseDelayStyle = () => {
-        if(showPulseDelay){
-            return {
-                display: 'unset'
-            }
-        }else{
-            return {
-                display: 'none'
-            }
-        }
+    getDelayValue = () => {
+        return this.props.state.commandState.delay;
     }
 
-    getFadeDelayStyle = () => {
-        if(showFadeDelay){
-            return {
-                display: 'unset'
-            }
-        }else{
-            return {
-                display: 'none'
-            }
+    updateDelayValue = (e) => {
+        let delay = parseInt(e.target.value);
+        if(isNaN(delay)){
+            delay = 0;
         }
-    }
-
-    applyDefaultSelection = () => {
-        this.staticRadioRef.current.click();
+        this.props.stateUpdaters.updateCommandState(this.props.state.commandState.animation, delay);
     }
 
     render() {
         return (
             <div className="animationListMainDiv">
-                <h3>Step 2: Choose Animation</h3>
+                <h3>Select Animation</h3>
                 <div>
-                    <label className="radioLabel"><input type="radio" name="animation" value="Static" onClick={this.radioClicked} ref={this.staticRadioRef}/>Static</label>
-                    <label className="textLabel" style={this.getStaticDelayStyle()}>Delay (ms):<input type="text" name="staticDelay" ref={this.staticDelayRef} defaultValue="100" maxLength="5" onKeyPress={this.updateDelay}/></label>
+                    <label className="inRowDisplayLabel">Animation: 
+                        <select className="inRowDisplayInput" onChange={this.switchAnimation} value={this.getSelectedAnimation()}>
+                            {animations.map(animation => <option key={animation} value={animation}> {animation} </option>)}
+                        </select>
+                    </label>
                 </div>
                 <div>
-                    <label className="radioLabel"><input type="radio" name="animation" value="Blink" onClick={this.radioClicked}/>Blink</label>
-                    <label className="textLabel" style={this.getBlinkDelayStyle()}>Delay (ms):<input type="text" name="blinkDelay" ref={this.blinkDelayRef} defaultValue="100" maxLength="5"  onKeyPress={this.updateDelay}/></label>
-                </div>
-                <div>
-                    <label className="radioLabel"><input type="radio" name="animation" value="Pulse" onClick={this.radioClicked}/>Pulse</label>
-                    <label className="textLabel" style={this.getPulseDelayStyle()}>Delay (ms):<input type="text" name="pulseDelay" ref={this.pulseDelayRef} defaultValue="255" maxLength="5" onKeyPress={this.updateDelay}/></label>
-                </div>
-                <div>
-                    <label className="radioLabel"><input type="radio" name="animation" value="Fade" onClick={this.radioClicked}/>Fade</label>
-                    <label className="textLabel" style={this.getFadeDelayStyle()}>Delay (ms):<input type="text" name="fadeDelay" ref={this.fadeDelayRef} defaultValue="255" maxLength="5" onKeyPress={this.updateDelay}/></label>
+                    <label className="inRowDisplayLabel">Delay:<input className="inRowDisplayInput" type="number" type="text" name="delay" value={this.getDelayValue()} maxLength="4" onChange={this.updateDelayValue}/></label>
                 </div>
             </div>
         )
-    }
-
-    componentDidMount = () => {
-        this.applyDefaultSelection();
     }
 }
 
