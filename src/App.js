@@ -95,17 +95,17 @@ class App extends React.Component {
     let primaryColorState = {
       colorList: ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"], //need to find a way to add selected color to list incase it is not already there
       isPickingColor: false,
-      red: updates.data[2][0].red,
-      green: updates.data[2][0].green,
-      blue: updates.data[2][0].blue
+      red: updates.data[2][0].primaryColor.red,
+      green: updates.data[2][0].primaryColor.green,
+      blue: updates.data[2][0].primaryColor.blue
     }
 
     let secondaryColorState = { //currently matches primary, need to add full secondary color functionality
       colorList: ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"], //need to find a way to add selected color to list incase it is not already there
       isPickingColor: false,
-      red: updates.data[2][0].red,
-      green: updates.data[2][0].green,
-      blue: updates.data[2][0].blue
+      red: updates.data[2][0].secondaryColor.red,
+      green: updates.data[2][0].secondaryColor.green,
+      blue: updates.data[2][0].secondaryColor.blue
     }
 
     let commandState = {
@@ -164,7 +164,7 @@ class App extends React.Component {
   }
 
   showDisplayBuilder = () =>{
-    if(this.state.deviceState.connectionStatus !== 2){ //should check for 2 (connected), using null while in development
+    if(this.state.deviceState.connectionStatus === 2){ //should check for 2 (connected), using null while in development
       return (
         <React.Fragment>
           <DisplayBuilder state={this.state} stateUpdaters={this.stateUpdaters}/>

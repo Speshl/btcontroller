@@ -47,47 +47,17 @@
     "commandUUIDs":[
         "f1ca8500-6f92-4c90-adcf-86932eae494e"
     ],
-    "commandColorUUIDs":[
-        "f1ca8501-6f92-4c90-adcf-86932eae494e",
-        "b7fa5bb1-83a9-4c12-9386-44915994d3e6",
-        "9d07ec51-cd1f-4e0b-9b66-e2c543b564bf",
-        "75ba4c91-3379-457c-a94b-dc106fccf5b7",
-        "1a4d00b1-5397-441d-b161-c8755fa8a7f7"
+    "commandPrimaryColorUUIDs":[
+        "f1ca8501-6f92-4c90-adcf-86932eae494e"
     ],
-    "commandRedUUIDs":[
-        "f1ca8501-6f92-4c90-adcf-86932eae494e",
-        "b7fa5bb1-83a9-4c12-9386-44915994d3e6",
-        "9d07ec51-cd1f-4e0b-9b66-e2c543b564bf",
-        "75ba4c91-3379-457c-a94b-dc106fccf5b7",
-        "1a4d00b1-5397-441d-b161-c8755fa8a7f7"
-    ],
-    "commandGreenUUIDs":[
-        "f1ca8502-6f92-4c90-adcf-86932eae494e",
-        "b7fa5bb2-83a9-4c12-9386-44915994d3e6",
-        "9d07ec52-cd1f-4e0b-9b66-e2c543b564bf",
-        "75ba4c92-3379-457c-a94b-dc106fccf5b7",
-        "1a4d00b2-5397-441d-b161-c8755fa8a7f7"
-    ],
-    "commandBlueUUIDs": [
-        "f1ca8503-6f92-4c90-adcf-86932eae494e",
-        "b7fa5bb3-83a9-4c12-9386-44915994d3e6",
-        "9d07ec53-cd1f-4e0b-9b66-e2c543b564bf",
-        "75ba4c93-3379-457c-a94b-dc106fccf5b7",
-        "1a4d00b3-5397-441d-b161-c8755fa8a7f7"
+    "commandSecondaryColorUUIDs":[
+        "f1ca8502-6f92-4c90-adcf-86932eae494e"
     ],
     "commandDelayUUIDs": [
-        "f1ca8504-6f92-4c90-adcf-86932eae494e",
-        "b7fa5bb4-83a9-4c12-9386-44915994d3e6",
-        "9d07ec54-cd1f-4e0b-9b66-e2c543b564bf",
-        "75ba4c94-3379-457c-a94b-dc106fccf5b7",
-        "1a4d00b4-5397-441d-b161-c8755fa8a7f7"
+        "f1ca8504-6f92-4c90-adcf-86932eae494e"
     ],
     "commandAnimationUUIDs": [
-        "f1ca8505-6f92-4c90-adcf-86932eae494e",
-        "b7fa5bb5-83a9-4c12-9386-44915994d3e6",
-        "9d07ec55-cd1f-4e0b-9b66-e2c543b564bf",
-        "75ba4c95-3379-457c-a94b-dc106fccf5b7",
-        "1a4d00b5-5397-441d-b161-c8755fa8a7f7"
+        "f1ca8505-6f92-4c90-adcf-86932eae494e"
     ],
     "commandChannelToggleUUIDs": [
         "f1ca8507-6f92-4c90-adcf-86932eae494e"

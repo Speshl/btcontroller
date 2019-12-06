@@ -1,4 +1,4 @@
-//FASTLED doesn't appear to be supported yet on the arduino nano 33 IOT
+//FASTLED doesn't appear to be supported yet on the arduino nano 33 IOT (this sketch is outdated and not runnable but left for examples)
 #include <FlashStorage.h>
 #include <ArduinoBLE.h>
 #include <FastLED.h>

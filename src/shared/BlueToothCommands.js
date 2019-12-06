@@ -141,33 +141,37 @@ export default class BlueToothCommands {
     static loadCommandsData = async (service, commandIndex) => {
         try{
             let [
-                colorChar,
+                primaryColorChar,
+                secondaryColorChar,
                 delayChar,
                 animationChar,
                 usedChannelsChar
             ] = await Promise.all([
-                service.getCharacteristic(serviceUUIDs.commandColorUUIDs[commandIndex]),
+                service.getCharacteristic(serviceUUIDs.commandPrimaryColorUUIDs[commandIndex]),
+                service.getCharacteristic(serviceUUIDs.commandSecondaryColorUUIDs[commandIndex]),
                 service.getCharacteristic(serviceUUIDs.commandDelayUUIDs[commandIndex]),
                 service.getCharacteristic(serviceUUIDs.commandAnimationUUIDs[commandIndex]),
                 service.getCharacteristic(serviceUUIDs.commandChannelToggleUUIDs[commandIndex])
             ]);
 
             let [
-                colorData,
+                primaryColorData,
+                secondaryColorData,
                 delayData,
                 animationData,
                 usedChannelsData
             ] = await Promise.all([
-                colorChar.readValue(),
+                primaryColorChar.readValue(),
+                secondaryColorChar.readValue(),
                 delayChar.readValue(),
                 animationChar.readValue(),
                 usedChannelsChar.readValue()
             ]);
-            let color = this.getColorFromUint8Array(colorData);
+            let primaryColor = this.getColorFromUint8Array(primaryColorData);
+            let secondaryColor = this.getColorFromUint8Array(secondaryColorData);
             let returnObject = {
-                red: color.red,
-                green: color.green,
-                blue: color.blue,
+                primaryColor: primaryColor,
+                secondaryColor: secondaryColor,
                 delay: this.getIntFromUint8Array(delayData),
                 animation: animationData.getUint8(0),
                 usedChannels: this.getUsedChannelsFromInt(usedChannelsData)
@@ -231,19 +235,22 @@ export default class BlueToothCommands {
             let service = await server.getPrimaryService(serviceUUIDs.commandUUIDs[0]);
 
             let [
-                colorChar,
+                primaryColorChar,
+                secondaryColorChar,
                 delayChar,
                 animationChar,
                 usesChannelChar
             ] = await Promise.all([
-                service.getCharacteristic(serviceUUIDs.commandColorUUIDs[0]),
+                service.getCharacteristic(serviceUUIDs.commandPrimaryColorUUIDs[0]),
+                service.getCharacteristic(serviceUUIDs.commandSecondaryColorUUIDs[0]),
                 service.getCharacteristic(serviceUUIDs.commandDelayUUIDs[0]),
                 service.getCharacteristic(serviceUUIDs.commandAnimationUUIDs[0]),
                 service.getCharacteristic(serviceUUIDs.commandChannelToggleUUIDs[0])
             ]);
 
             await Promise.all([
-                colorChar.writeValue(this.getUint8ArrayFromColor(primaryColor.red, primaryColor.green, primaryColor.blue)),
+                primaryColorChar.writeValue(this.getUint8ArrayFromColor(primaryColor.red, primaryColor.green, primaryColor.blue)),
+                secondaryColorChar.writeValue(this.getUint8ArrayFromColor(secondaryColor.red, secondaryColor.green, secondaryColor.blue)),
                 delayChar.writeValue(this.getUint8ArrayFromInt(command.delay)),
                 animationChar.writeValue(this.getUint8ArrayFromInt(command.animation)),
                 usesChannelChar.writeValue(this.getIntFromUsedChannels(usedChannels))
