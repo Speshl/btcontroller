@@ -29,7 +29,7 @@ class DeviceSelector extends Component {
 
   load = async () => {
     if(this.props.state.deviceState.connectionStatus === 1){
-      let data = await BlueToothCommands.load(this.props.state.deviceState.selectedDevice);
+      let data = await BlueToothCommands.bulkLoad(this.props.state.deviceState.selectedDevice);
       this.props.stateUpdaters.updateAllStates({server: this.props.state.deviceState.selectedDevice, data: data});
     }
   }

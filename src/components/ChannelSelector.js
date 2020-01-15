@@ -11,14 +11,15 @@ export class ChannelSelector extends Component {
             let type = (this.props.state.channelState.editedChannelDescription.type !== null) ? this.props.state.channelState.editedChannelDescription.type : this.props.state.channelState.channelDescriptions[id].type
             let order = (this.props.state.channelState.editedChannelDescription.order !== null) ? this.props.state.channelState.editedChannelDescription.order : this.props.state.channelState.channelDescriptions[id].order
             let position = (this.props.state.channelState.editedChannelDescription.position !== null) ? this.props.state.channelState.editedChannelDescription.position : this.props.state.channelState.channelDescriptions[id].position
-            
+            let used = this.props.state.channelState.selectedChannelList[id];
             let status = await BlueToothCommands.updateChannel(
                 this.props.state.deviceState.selectedDevice,
                 id,
                 type,
                 numLEDs,
-                position,
-                order
+                this.getIntFromPosition(position),
+                order,
+                used
             );
 
             if(status){
@@ -42,6 +43,14 @@ export class ChannelSelector extends Component {
         }else{
             //there is nothing to update
         }
+    }
+
+    getIntFromPosition = (position) => {
+        let intPosition = 0;
+        let splitPosition = position.split(":");
+        intPosition = parseInt(splitPosition[0]) * 4
+        intPosition += parseInt(splitPosition[1]);
+        return intPosition;
     }
 
     channelClicked = (e) => {

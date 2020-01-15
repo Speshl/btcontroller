@@ -86,46 +86,73 @@ class App extends React.Component {
   }
 
   updateAllStates = (updates) => {
-    let deviceState = {
-      selectedDevice: updates.server,
-      connectionStatus: 2, //connected
-      lightsOn: updates.data[0]
-    }
+    try{
+      let deviceState = {
+        selectedDevice: updates.server,
+        connectionStatus: 2, //connected
+        lightsOn: updates.data.lightsOn
+      }
 
-    let primaryColorState = {
-      colorList: ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"], //need to find a way to add selected color to list incase it is not already there
-      isPickingColor: false,
-      red: updates.data[2][0].primaryColor.red,
-      green: updates.data[2][0].primaryColor.green,
-      blue: updates.data[2][0].primaryColor.blue
-    }
+      let primaryColorState = {
+        colorList: ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"], //need to find a way to add selected color to list incase it is not already there
+        isPickingColor: false,
+        red: updates.data.command.primaryRed,
+        green: updates.data.command.primaryGreen,
+        blue: updates.data.command.primaryBlue
+      }
 
-    let secondaryColorState = { //currently matches primary, need to add full secondary color functionality
-      colorList: ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"], //need to find a way to add selected color to list incase it is not already there
-      isPickingColor: false,
-      red: updates.data[2][0].secondaryColor.red,
-      green: updates.data[2][0].secondaryColor.green,
-      blue: updates.data[2][0].secondaryColor.blue
-    }
+      let secondaryColorState = { //currently matches primary, need to add full secondary color functionality
+        colorList: ["#FFFFFF", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF"], //need to find a way to add selected color to list incase it is not already there
+        isPickingColor: false,
+        red: updates.data.command.secondaryRed,
+        green: updates.data.command.secondaryGreen,
+        blue: updates.data.command.secondaryBlue
+      }
 
-    let commandState = {
-      animation: updates.data[2][0].animation,
-      delay: updates.data[2][0].delay
-    }
+      let commandState = {
+        animation: updates.data.command.animation,
+        delay: updates.data.command.stepDelay
+      }
 
-    let channelState = {
-      selectedChannelList: updates.data[2][0].usedChannels,
-      channelDescriptions: this.getChannelDescriptions(updates.data[1]),
-      editedChannelDescription: null
-    }
+      let channelState = {
+        selectedChannelList: this.getSelectedChannelList(updates.data.channels),
+        channelDescriptions: this.getChannelDescriptions(updates.data.channels),
+        editedChannelDescription: null
+      }
 
-    this.setState({
-      deviceState: deviceState,
-      channelState: channelState,
-      primaryColorState: primaryColorState,
-      secondaryColorState: secondaryColorState,
-      commandState: commandState
-    });
+      this.setState({
+        deviceState: deviceState,
+        channelState: channelState,
+        primaryColorState: primaryColorState,
+        secondaryColorState: secondaryColorState,
+        commandState: commandState
+      });
+    }catch(e){
+      alert(e);
+    }
+  }
+
+  getSelectedChannelList = (descriptions) => {
+    let returnArray = [];
+    for(let i=0; i<8; i++){
+      if(descriptions != null && descriptions[i] != null){
+        if(descriptions[i].stripUsed === 1){
+          returnArray.push(true);
+        }else{
+          returnArray.push(false);
+        }
+      }else{
+        returnArray.push(false);
+      }
+    }
+    return returnArray;
+  }
+
+  getPositionFromInt = (intPosition) => {
+    let numCols = 3;
+    let row = Math.floor(intPosition / numCols);
+    let col = intPosition % numCols;
+    return row.toString() +":"+col.toString()
   }
 
   getChannelDescriptions = (descriptions) => {
@@ -135,10 +162,11 @@ class App extends React.Component {
       if(descriptions != null && descriptions[i] != null){
         entry = {
           id: i,
-          type: descriptions[i].stripData.type,
+          type: descriptions[i].stripType,
           numLEDs: descriptions[i].numLEDs,
-          position: descriptions[i].position,
-          order: descriptions[i].stripData.order
+          position: this.getPositionFromInt(descriptions[i].stripPosition),
+          order: descriptions[i].stripOrder,
+          used: descriptions[i].stripUsed
         }
       }else{
         entry = {
@@ -146,7 +174,8 @@ class App extends React.Component {
           type: null,
           numLEDs: null,
           position: null,
-          order: null
+          order: null,
+          used: false
         }
       }
       returnArray.push(entry);

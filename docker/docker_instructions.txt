@@ -1,0 +1,5 @@
+Within MINGW termainal Run the following command to build the dockerfile into an image - docker build . -t squadglowimage
+Image is run from docker quickstart termianl (Docker for windows 10 home / Docker Toolbox)
+Run the following command within the terminal to run the image in a container - docker run -d -it -p 80:80 -p 443:443 squadglowimage 
+Make sure port forwarding is setup in the virtual box settings to forward from the virtual machine to the host machine.
+Container can then be monitored from MINGW terminal with normal docker commands (docker ps)

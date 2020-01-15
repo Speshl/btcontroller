@@ -3,7 +3,7 @@
 #include <ArduinoBLE.h>
 #include <Adafruit_NeoPixel.h>
 
-#define MAX_LEDS_PER_CHANNEL 300
+#define MAX_LEDS_PER_CHANNEL 100
 #define MAX_COMMANDS 1
 #define MAX_CHANNELS 8
 #define UUID_LENGTH 37

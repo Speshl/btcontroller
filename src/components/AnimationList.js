@@ -4,14 +4,11 @@ import './../css/AnimationList.css';
 const animations = [
     "Static",
     "Blink",
-    "Pulse"/*,
-    "Wave (L2R)",
-    "Wave (R2L)",
-    "Wave (F2B)",
-    "Wave (B2F)",
-    "Stack (F2B)",
-    "Stack (B2F)",
-    "RGB Flow"*/
+    "Pulse",
+    "Wave",
+    "Roll",
+    "Roll Alternate",
+    "Stack"
 ];
 
 export class AnimationList extends Component {
@@ -51,7 +48,7 @@ export class AnimationList extends Component {
                     </label>
                 </div>
                 <div>
-                    <label className="inRowDisplayLabel">Delay:<input className="inRowDisplayInput" type="number" type="text" name="delay" value={this.getDelayValue()} maxLength="4" onChange={this.updateDelayValue}/></label>
+                    <label className="inRowDisplayLabel">Delay:<input className="inRowDisplayInput indentText" type="number" type="text" name="delay" value={this.getDelayValue()} maxLength="4" onChange={this.updateDelayValue}/></label>
                 </div>
             </div>
         )

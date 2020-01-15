@@ -1,65 +1,17 @@
 {
-    "generalUUIDs": [
+    "serviceUUID": "8d727090-093e-46a8-bf1d-23eeee2da202",
+    "saveUUID": "8d727091-093e-46a8-bf1d-23eeee2da202",
+    "onUUID": "8d727092-093e-46a8-bf1d-23eeee2da202",
+    "commandUUID": "8d727093-093e-46a8-bf1d-23eeee2da202",
+    "bulkReadUUID": "8d727094-093e-46a8-bf1d-23eeee2da202",
+    "channelUUIDs": [
+        "8d727095-093e-46a8-bf1d-23eeee2da202",
+        "8d727096-093e-46a8-bf1d-23eeee2da202",
+        "8d727097-093e-46a8-bf1d-23eeee2da202",
+        "8d727098-093e-46a8-bf1d-23eeee2da202",
         "8d727099-093e-46a8-bf1d-23eeee2da202",
         "8d72709a-093e-46a8-bf1d-23eeee2da202",
-        "8d72709b-093e-46a8-bf1d-23eeee2da202" 
-    ],
-    "channelUUIDs": [
-        "601e09c0-80c6-48b6-af07-8b3e972db14b",
-        "00ffb030-9cc8-4f4e-80d8-a5d0391e5060",
-        "9cac5610-3cce-4b5b-8f09-7befa63be3c9",
-        "12d2c3e0-1c17-4ae8-9307-5f400dc5c6e4",
-        "20a734d0-1e9a-4da4-bc33-b914db19b956",
-        "9452f330-e8ad-4db0-ab2b-779c57765093",
-        "aa2b7ad0-7721-4d79-895f-298a8addb129",
-        "bca82d00-f7f4-45c9-a261-ef4b55584f5b"
-    ],
-    "channelNumLEDsUUIDs": [
-        "601e09c1-80c6-48b6-af07-8b3e972db14b",
-        "00ffb031-9cc8-4f4e-80d8-a5d0391e5060",
-        "9cac5611-3cce-4b5b-8f09-7befa63be3c9",
-        "12d2c3e1-1c17-4ae8-9307-5f400dc5c6e4",
-        "20a734d1-1e9a-4da4-bc33-b914db19b956",
-        "9452f331-e8ad-4db0-ab2b-779c57765093",
-        "aa2b7ad1-7721-4d79-895f-298a8addb129",
-        "bca82d01-f7f4-45c9-a261-ef4b55584f5b"
-    ],
-    "channelStripTypeUUIDs":[
-        "601e09c2-80c6-48b6-af07-8b3e972db14b",
-        "00ffb032-9cc8-4f4e-80d8-a5d0391e5060",
-        "9cac5612-3cce-4b5b-8f09-7befa63be3c9",
-        "12d2c3e2-1c17-4ae8-9307-5f400dc5c6e4",
-        "20a734d2-1e9a-4da4-bc33-b914db19b956",
-        "9452f332-e8ad-4db0-ab2b-779c57765093",
-        "aa2b7ad2-7721-4d79-895f-298a8addb129",
-        "bca82d02-f7f4-45c9-a261-ef4b55584f5b"
-    ],
-    "channelPositionUUIDs":[
-        "601e09c3-80c6-48b6-af07-8b3e972db14b",
-        "00ffb033-9cc8-4f4e-80d8-a5d0391e5060",
-        "9cac5613-3cce-4b5b-8f09-7befa63be3c9",
-        "12d2c3e3-1c17-4ae8-9307-5f400dc5c6e4",
-        "20a734d3-1e9a-4da4-bc33-b914db19b956",
-        "9452f333-e8ad-4db0-ab2b-779c57765093",
-        "aa2b7ad3-7721-4d79-895f-298a8addb129",
-        "bca82d03-f7f4-45c9-a261-ef4b55584f5b"
-    ],
-    "commandUUIDs":[
-        "f1ca8500-6f92-4c90-adcf-86932eae494e"
-    ],
-    "commandPrimaryColorUUIDs":[
-        "f1ca8501-6f92-4c90-adcf-86932eae494e"
-    ],
-    "commandSecondaryColorUUIDs":[
-        "f1ca8502-6f92-4c90-adcf-86932eae494e"
-    ],
-    "commandDelayUUIDs": [
-        "f1ca8504-6f92-4c90-adcf-86932eae494e"
-    ],
-    "commandAnimationUUIDs": [
-        "f1ca8505-6f92-4c90-adcf-86932eae494e"
-    ],
-    "commandChannelToggleUUIDs": [
-        "f1ca8507-6f92-4c90-adcf-86932eae494e"
+        "8d72709b-093e-46a8-bf1d-23eeee2da202",
+        "8d72709c-093e-46a8-bf1d-23eeee2da202"
     ]
 }

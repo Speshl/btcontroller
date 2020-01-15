@@ -13,8 +13,7 @@ export class DisplayBuilder extends Component {
                 this.props.state.deviceState.selectedDevice,
                 this.props.state.primaryColorState,
                 this.props.state.secondaryColorState,
-                this.props.state.commandState,
-                this.props.state.channelState.selectedChannelList
+                this.props.state.commandState
             );
         }catch(err){
             console.log(err);

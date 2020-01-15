@@ -18,6 +18,10 @@
     border-color: whitesmoke;
 }
 
+.indentText{
+    text-indent: 5px;
+}
+
 .animationListMainDiv{
     text-align: center;
 }
