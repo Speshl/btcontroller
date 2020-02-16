@@ -1,3 +1,5 @@
+docker exec -it 1a429e540dcb sh
+
 docker create \
   --name=letsencrypt \
   --cap-add=NET_ADMIN \

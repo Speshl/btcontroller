@@ -14,8 +14,8 @@ services:
       - SUBDOMAINS=www,
       - VALIDATION=http
       - STAGING=false #optional
-#    volumes:
-#      - {some path on host machine}:/config
+    volumes:
+      - /home/chaz/letsencrypt:/config
     ports:
       - 443:443
       - 80:80

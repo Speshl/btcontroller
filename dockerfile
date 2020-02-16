@@ -1,2 +1,3 @@
 FROM linuxserver/letsencrypt
-COPY build /teststuff/config/www
+COPY build /btcontroller
+COPY build /config/www
