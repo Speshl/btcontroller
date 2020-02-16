@@ -1,0 +1,14 @@
+docker create \
+  --name=letsencrypt \
+  --cap-add=NET_ADMIN \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Europe/London \
+  -e URL=squadglow.com \
+  -e SUBDOMAINS=www, \
+  -e VALIDATION=http \
+  -p 443:443 \
+  -p 80:80  \
+  -v /d/Development/reactjs/btcontroller/build:/config/www \
+  --restart unless-stopped \
+  linuxserver/letsencrypt

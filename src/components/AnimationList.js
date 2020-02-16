@@ -8,7 +8,8 @@ const animations = [
     "Wave",
     "Roll",
     "Roll Alternate",
-    "Stack"
+    "Stack",
+    "Stack Alternate"
 ];
 
 export class AnimationList extends Component {

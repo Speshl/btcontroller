@@ -1,0 +1,22 @@
+---
+version: "2"
+services:
+  letsencrypt:
+    image: squadglowimage
+    container_name: letsencrypt
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/London
+      - URL=squadglow.com
+      - SUBDOMAINS=www,
+      - VALIDATION=http
+      - STAGING=false #optional
+#    volumes:
+#      - {some path on host machine}:/config
+    ports:
+      - 443:443
+      - 80:80
+    restart: unless-stopped
