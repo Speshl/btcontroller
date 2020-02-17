@@ -32,7 +32,24 @@
 }
 
 .channelInput{
+    margin: unset;
     margin-bottom: 5px;
+    color: whitesmoke;
+    background: black;
+    border-width: 1px;
+    border-style: solid;
+    border-color: whitesmoke;
+}
+.channelTextInput{
+    padding: unset;
+    margin: unset;
+    margin-bottom: 5px;
+    text-indent: 5px;
+    color: whitesmoke;
+    background: black;
+    border-width: 1px;
+    border-style: solid;
+    border-color: whitesmoke;
 }
 
 .channelPosition{
@@ -54,10 +71,32 @@
     margin-bottom: 5px;
 }
 
-input[type="text"]{
-    max-width: 75px;
-}
-
 input[type="button" i]:disabled{
     color:red;
 }
+
+.row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .column{
+    display: flex;
+    flex-direction: column;
+    flex-basis: 100%;
+    flex: 1;
+  }
+
+  .leftColumn {
+    text-align: right;    
+  }
+
+  .rightColumn {
+    width: 75%
+  }
+
+  .inlineColumn{
+      display: inline-block;
+  }

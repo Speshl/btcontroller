@@ -54,8 +54,8 @@ export default class BlueToothCommands {
 
         let channelsData = [];
         for(let i=0; i< 8; i++){
-            let startIndex = 12+(6*i);
-            let endIndex = startIndex + 6;
+            let startIndex = 12+(8*i);
+            let endIndex = startIndex + 8;
             channelsData.push(this.readChannelData(data.buffer.slice(startIndex, endIndex)));
         }
         
@@ -140,11 +140,13 @@ export default class BlueToothCommands {
         let uInt8Viewer = new Uint8Array(value);
         let uInt16Viewer = new Uint16Array(value);
         return {
-            stripUsed: uInt8Viewer[0],
-            stripType: uInt8Viewer[1],
-            stripOrder: uInt8Viewer[2],
-            stripPosition: uInt8Viewer[3],
-            numLEDs: uInt16Viewer[2] //TODO: Verify if this is correct
+            isCentered: uInt8Viewer[0],
+            isInterior: uInt8Viewer[1],
+            stripUsed: uInt8Viewer[2],
+            stripType: uInt8Viewer[3],
+            stripOrder: uInt8Viewer[4],
+            stripPosition: uInt8Viewer[5],
+            numLEDs: uInt16Viewer[3] //TODO: Verify if this is correct
         }
     }
 
@@ -156,6 +158,8 @@ export default class BlueToothCommands {
         }catch(error){
             console.log("Error reading channel "+channelIndex+" data: "+error);
             return {
+                isCentered: 0,
+                isInterior: 0,
                 stripUsed: 0,
                 stripType: 0,
                 stripOrder: 0,
@@ -198,7 +202,7 @@ export default class BlueToothCommands {
         }
     }
 
-    static updateChannel = async (server, channelIndex, stripType, numLEDs, position, order, used) => {
+    static updateChannel = async (server, channelIndex, stripType, numLEDs, position, order, used, isInterior, isCentered) => {
         try{
             if(!server.connected){
                 server = await server.connect();
@@ -212,6 +216,8 @@ export default class BlueToothCommands {
             let buffer8bit = new Uint8Array(buffer);
     
             let data = new Uint8Array([
+                isCentered,
+                isInterior,
                 used,
                 stripType,
                 order,

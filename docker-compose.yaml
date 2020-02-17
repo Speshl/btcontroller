@@ -13,7 +13,7 @@ services:
       - URL=squadglow.com
       - SUBDOMAINS=www,
       - VALIDATION=http
-      - STAGING=false #optional
+      - STAGING=true #optional
     volumes:
       - /home/chaz/letsencrypt:/config
     ports:

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import BlueToothCommands from './../shared/BlueToothCommands';
 import './../css/DeviceSelector.css';
 
-//this.props.selectedDevice
 class DeviceSelector extends Component {
 
   connect = async () => {
@@ -35,7 +34,7 @@ class DeviceSelector extends Component {
   }
 
   save = async () => {
-    if(this.props.state.selectedDevice){
+    if(this.props.state.deviceState.selectedDevice){
       BlueToothCommands.save(this.props.state.deviceState.selectedDevice);
     }
   }

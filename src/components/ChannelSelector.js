@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import './../css/ChannelSelector.css';
 import BlueToothCommands from './../shared/BlueToothCommands';
+import { isTSAnyKeyword } from '@babel/types';
 
 export class ChannelSelector extends Component {
 
@@ -12,6 +13,8 @@ export class ChannelSelector extends Component {
             let order = (this.props.state.channelState.editedChannelDescription.order !== null) ? this.props.state.channelState.editedChannelDescription.order : this.props.state.channelState.channelDescriptions[id].order
             let position = (this.props.state.channelState.editedChannelDescription.position !== null) ? this.props.state.channelState.editedChannelDescription.position : this.props.state.channelState.channelDescriptions[id].position
             let used = this.props.state.channelState.selectedChannelList[id];
+            let isInterior = (this.props.state.channelState.editedChannelDescription.isInterior !== null) ? this.props.state.channelState.editedChannelDescription.isInterior : this.props.state.channelState.channelDescriptions[id].isInterior
+            let isCentered = (this.props.state.channelState.editedChannelDescription.isCentered !== null) ? this.props.state.channelState.editedChannelDescription.isCentered : this.props.state.channelState.channelDescriptions[id].isCentered
             let status = await BlueToothCommands.updateChannel(
                 this.props.state.deviceState.selectedDevice,
                 id,
@@ -19,7 +22,9 @@ export class ChannelSelector extends Component {
                 numLEDs,
                 this.getIntFromPosition(position),
                 order,
-                used
+                used,
+                isInterior,
+                isCentered
             );
 
             if(status){
@@ -28,6 +33,8 @@ export class ChannelSelector extends Component {
                 channelDescriptions[id].type = type;
                 channelDescriptions[id].order = order;
                 channelDescriptions[id].position = position;
+                channelDescriptions[id].isInterior = isInterior;
+                channelDescriptions[id].isCentered = isCentered;
                 this.props.stateUpdaters.updateChannelState(
                     this.props.state.channelState.selectedChannelList,
                     channelDescriptions,
@@ -36,7 +43,9 @@ export class ChannelSelector extends Component {
                         type: null,
                         numLEDs: null,
                         position: null,
-                        order: null
+                        order: null,
+                        isInterior: null,
+                        isCentered: null
                     }
                 );
             }
@@ -116,7 +125,9 @@ export class ChannelSelector extends Component {
                 type: null,
                 numLEDs: null,
                 position: null,
-                order: null
+                order: null,
+                isInterior: null,
+                isCentered: null
             }
         );
     }
@@ -137,6 +148,30 @@ export class ChannelSelector extends Component {
         if(this.props.state.channelState.editedChannelDescription !== null){
             let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
             editedChannelDescription.type = parseInt(e.target.value);
+            this.props.stateUpdaters.updateChannelState(
+                this.props.state.channelState.selectedChannelList,
+                this.props.state.channelState.channelDescriptions,
+                editedChannelDescription
+            );
+        }
+    }
+
+    updateInterior = (e) => {
+        if(this.props.state.channelState.editedChannelDescription !== null){
+            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
+            editedChannelDescription.isInterior = e.target.checked
+            this.props.stateUpdaters.updateChannelState(
+                this.props.state.channelState.selectedChannelList,
+                this.props.state.channelState.channelDescriptions,
+                editedChannelDescription
+            );
+        }
+    }
+
+    updateCentered = (e) => {
+        if(this.props.state.channelState.editedChannelDescription !== null){
+            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
+            editedChannelDescription.isCentered = e.target.checked
             this.props.stateUpdaters.updateChannelState(
                 this.props.state.channelState.selectedChannelList,
                 this.props.state.channelState.channelDescriptions,
@@ -177,7 +212,9 @@ export class ChannelSelector extends Component {
                 type: null,
                 numLEDs: null,
                 position: null,
-                order: null
+                order: null,
+                isInterior: null,
+                isCentered: null
             }
         }
         this.props.stateUpdaters.updateChannelState(
@@ -246,13 +283,30 @@ export class ChannelSelector extends Component {
         }
     }
 
+    getInteriorCheckedState = () => {
+        if(this.props.state.channelState.editedChannelDescription !== null){
+            return (this.props.state.channelState.editedChannelDescription.isInterior === true) ? true : false
+        }else{
+            return false;
+        }
+    }
+
+    getCenteredCheckedState = () => {
+        if(this.props.state.channelState.editedChannelDescription !== null){
+            return (this.props.state.channelState.editedChannelDescription.isCentered === true) ? true : false
+        }else{
+            return false;
+        }
+    }
+
     showAddEditDescription = () => {
         if(this.props.state.channelState.editedChannelDescription !== null){
             return <React.Fragment>
                 <div className="channelAddEditDiv">
-                    <div>
-                        <label>Channel:
-                            <select className="channelInput" onChange={this.switchEditingChannel} value={this.getSelectedChannel()}>
+                    <div className='row'>
+                        <label className='column leftColumn'>Channel:</label>
+                        <div className="column">
+                            <select className="channelInput rightColumn" onChange={this.switchEditingChannel} value={this.getSelectedChannel()}>
                                 <option value={0}>0</option>
                                 <option value={1}>1</option>
                                 <option value={2}>2</option>
@@ -262,14 +316,18 @@ export class ChannelSelector extends Component {
                                 <option value={6}>6</option>
                                 <option value={7}>7</option>
                             </select>
-                        </label>
+                        </div>
                     </div>
-                    <div>
-                        <label>LED Count:<input className="channelInput" type="text" name="numLEDs" value={this.getNumLEDsValue()} maxLength="3" onChange={this.updateNumLEDs}/></label>
+                    <div className='row'>
+                        <label className='column leftColumn'>LED Count:</label>
+                        <div className="column">
+                            <input className="channelTextInput rightColumn" type="text" name="numLEDs" value={this.getNumLEDsValue()} maxLength="3" onChange={this.updateNumLEDs}/> 
+                        </div>
                     </div>
-                    <div>
-                        <label>Color Order:
-                            <select className="channelInput" value={this.getSelectedColorOrder()} onChange={this.updateColorOrder}>
+                    <div className='row'>
+                        <label className='column leftColumn'>Color Order:</label>
+                        <div className="column">
+                            <select className="channelInput rightColumn" value={this.getSelectedColorOrder()} onChange={this.updateColorOrder}>
                                 <option value={0}>RGB</option>
                                 <option value={1}>RBG</option>
                                 <option value={2}>BRG</option>
@@ -277,16 +335,27 @@ export class ChannelSelector extends Component {
                                 <option value={4}>GBR</option>
                                 <option value={5}>GRB</option>
                             </select>
-                        </label>
+                        </div>                        
                     </div>
-                    <div>
-                        <label>Strip Type:
-                            <select className="channelInput" value={this.getSelectedStripType()} onChange={this.updateStripType}>
+                    <div className='row'>
+                        <label className='column leftColumn'>Strip Type:</label>
+                        <div className="column">
+                            <select className="channelInput rightColumn" value={this.getSelectedStripType()} onChange={this.updateStripType}>
                                 <option value={0}>NONE</option>
-                                <option value={1}>NEO KHZ800 (WS2812)</option>
-                                <option value={2}>NEO KHZ400 (WS2811)</option>
+                                <option value={1}>NEO KHZ800</option>
+                                <option value={2}>NEO KHZ400</option>
                             </select>
-                        </label>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='column inlineColumn'>
+                            <input name="isInterior" type="checkbox" checked={this.getInteriorCheckedState()} onChange={this.updateInterior}/>
+                            <label>In Interior?</label>
+                        </div>
+                        <div className="column inlineColumn">
+                            <input name="isCentered" type="checkbox" checked={this.getCenteredCheckedState()} onChange={this.updateCentered}/>
+                            <label>Is Centered?</label>
+                        </div>
                     </div>
                     <div className="channelPositionDiv" >
                         <label>Strip Position:
