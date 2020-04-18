@@ -22,7 +22,6 @@ void setup() {
 
 void loop() {
   state *currentState = getCurrentState();
-  // put your main code here, to run repeatedly:
   delayAndPoll(currentState, 0);
   runCommand(currentState);
 }

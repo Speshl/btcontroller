@@ -1,1 +1,2 @@
 To test service worker - Run the following command in the command prompt: chrome.exe --user-data-dir=d:/temp --ignore-certificate-errors --unsafely-treat-insecure-origin-as-secure=https://localhost:443
+

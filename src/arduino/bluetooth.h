@@ -1,3 +1,4 @@
+
 void setInitialCharacteristicValues(state* currentState);
 
 void updateBulkReadChar(state* currentState);

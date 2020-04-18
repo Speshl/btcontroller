@@ -2,6 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "defines.h"
 #include "states.h"
+#include <math.h>
 
 void clearStrips(staticState* sState){
   for(int i=0; i<MAX_CHANNELS; i++){
@@ -88,24 +89,87 @@ void setInitialStrips(state* currentState){
   }
 }
 
-bool setStripColorAtPosition(state* currentState, int row, int col, int led, uint32_t color){
+//this function assumes strip start by going along the top row, down the left side, then back accross the bottom row and then up the right side to finish at the start
+bool setStripColorAtPositionWithHeight(state* currentState, int channelIndex, int led, uint32_t color){
+  //LED max value should be half of width
+  bool isWidthEven = currentState->dynamic.channels[channelIndex].width % 2 == 0;
+  int topCenter = ceil(currentState->dynamic.channels[channelIndex].width / 2);
+  int bottomCenter = currentState->dynamic.channels[channelIndex].height + currentState->dynamic.channels[channelIndex].width + topCenter - 1;
+  int numberAddressablePositions = topCenter; //center pixel in the top row also tells us how many useable positions exist on the strip
+  int offset = 0; //offset is used in case where width is even and middle is actually 2 leds instead of just 1
+
+  if(isWidthEven){
+    offset = 1;
+  }
+
+  if(led >= numberAddressablePositions){//led index is out of bounds
+    return false;
+  }
+
+  if(led == 0){ //center led case
+    if(isWidthEven){
+      currentState->constant.strips[channelIndex]->setPixelColor(topCenter, color);// example 26 wide, halfwidth would be pixel 13
+      currentState->constant.strips[channelIndex]->setPixelColor(topCenter+offset, color); //halfwidth + 1 would be pixel 14
+      currentState->constant.strips[channelIndex]->setPixelColor(bottomCenter, color);
+      currentState->constant.strips[channelIndex]->setPixelColor(bottomCenter+offset, color);
+    }else{
+      currentState->constant.strips[channelIndex]->setPixelColor(topCenter, color); //setting just one pixel color since it was an odd width
+      currentState->constant.strips[channelIndex]->setPixelColor(bottomCenter, color); //setting just one pixel color since it was an odd width
+    }
+  }else{
+    currentState->constant.strips[channelIndex]->setPixelColor(topCenter-led, color);// example 26 wide,  led is 4, halfwidth would be pixel 13 -4 should be pixel 9
+    currentState->constant.strips[channelIndex]->setPixelColor(topCenter+offset+led, color); //halfwidth + 1 would be pixel 14 + led which is 4 would be 18
+    currentState->constant.strips[channelIndex]->setPixelColor(bottomCenter-led, color);
+    currentState->constant.strips[channelIndex]->setPixelColor(bottomCenter+offset+led, color);
+    
+    if(led == numberAddressablePositions - 1){//at the end of the width of the strip, need to turn on all side leds
+      for(int i=(topCenter+offset+led+1); i<(bottomCenter-led); i++){ //start at last led in the left end of top row and add 1 to it so we start going down the side until we get to the left most led of the bottom row
+        currentState->constant.strips[channelIndex]->setPixelColor(i, color); //this should handle all leds on left side of strip
+      }
+      
+      for(int i=(bottomCenter+offset+led); i<(currentState->dynamic.channels[channelIndex].width); i++){//all pixels passed the last led on the right side of the bottom row is assumed to just be the side leds
+        currentState->constant.strips[channelIndex]->setPixelColor(i, color); //this should handle all leds on right side of strip
+      }
+    }
+  }
+  return true;
+}
+
+bool setStripColorAtPosition(state* currentState, int row, int col, int pos, uint32_t color){
+  bool updated = false;
+  if( row <= 0 || col <= 0 || pos <= 0){
+    return updated;
+  }
+  
   for(int channel=0; channel < MAX_CHANNELS; channel++){ //loop over all channels to see if they are in this row and column
     int channelIndex = currentState->dynamic.mappedPositions[row][col][channel] - 1; //we added 1 to the index so we didn't lose it when storing, removing it here.  stores 1 or 0 if the channel is in this position
     
     if(channelIndex >= 0){//channel is in specified position
       if(isChannelActive(currentState, channelIndex) == true){//this channel is active and accepts updates
         if(currentState->dynamic.channels[channelIndex].isInterior == false || (currentState->dynamic.channels[channelIndex].isInterior == true && getInteriorSwitchState() == true)){ //channel is not interior, or if it is the interior switch is on
-           if(currentState->dynamic.channels[channelIndex].isCentered == true){//updates on this channel start in the center and work towards the end
-            //logic to start at the center of the strip and work outwards
-            //will need to handle odd and even strips where the middle point may be 2 leds togeather
-            //also need to account for the last led to be all the side leds of a square (for lightbars with led rings around them)
-          }else{//updates on this channel start at the beginning and work their way to the other end
-            if(currentState->dynamic.channels[channelIndex].numLEDs >= led){ //strip has an led at that position to update
-              currentState->constant.strips[channelIndex]->setPixelColor(led, color);
+           if(pos < getNumUseablePositions(currentState, channelIndex)){// channel has an addressable led at that position
+            if(currentState->dynamic.channels[channelIndex].height > 1){//updates on this channel start in the center and work towards the end
+              updated = setStripColorAtPositionWithHeight(currentState, channelIndex, pos, color);
+            }else{
+              currentState->constant.strips[channelIndex]->setPixelColor(pos, color);
+              updated = true;
+            }
           }
         }
-       }
       }
     }
   }
+  return updated;
+}
+
+
+bool setStripColorAtPositionAcrossColumns(state* currentState, int row, int pos, uint32_t color){
+  bool updated = false;
+  for(int col=0; col < NUM_COLS; col++){
+    bool hadUpdate = setStripColorAtPosition(currentState, row, col, pos, color);
+    if(hadUpdate){
+      updated = true;
+    }
+  }
+  return updated;
 }

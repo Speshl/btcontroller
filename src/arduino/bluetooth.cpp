@@ -34,6 +34,7 @@ void setInitialCharacteristicValues(state* currentState){
   Serial.println("Finish setting initial service values");
 }
 
+//todo: Update this to check for central and wait while connected. Currently times out when connecting to bluetooth
 bool delayAndPoll(state* currentState, int sleep){
   bool hasUpdated = false;
   unsigned long ulSleep = (unsigned long) sleep;

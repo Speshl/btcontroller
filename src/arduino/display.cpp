@@ -36,9 +36,6 @@ void describeChannelState(dynamicState *dState, int channelIndex){
   Serial.print(channelIndex);
   Serial.println(" - ");
 
-  Serial.print("Strip Is Centered: ");
-  Serial.println(dState->channels[channelIndex].isCentered);
-
   Serial.print("Strip Is Interior: ");
   Serial.println(dState->channels[channelIndex].isInterior);
 
@@ -56,6 +53,12 @@ void describeChannelState(dynamicState *dState, int channelIndex){
 
   Serial.print("Number LEDs: ");
   Serial.println(dState->channels[channelIndex].numLEDs);
+
+  Serial.print("Height: ");
+  Serial.println(dState->channels[channelIndex].height);
+
+  Serial.print("Width: ");
+  Serial.println(dState->channels[channelIndex].width);
 }
 
 void describeDynamicState(dynamicState *dState){

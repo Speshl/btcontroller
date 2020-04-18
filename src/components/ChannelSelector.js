@@ -6,7 +6,7 @@ import { isTSAnyKeyword } from '@babel/types';
 export class ChannelSelector extends Component {
 
     updateChannel = async (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
+        if(this.props.state.channelState.editedChannelDescription !== null && this.props.state.channelState.channelDescriptions !== null){
             let id = this.props.state.channelState.editedChannelDescription.id;
             let numLEDs = (this.props.state.channelState.editedChannelDescription.numLEDs !== null) ? this.props.state.channelState.editedChannelDescription.numLEDs : this.props.state.channelState.channelDescriptions[id].numLEDs
             let type = (this.props.state.channelState.editedChannelDescription.type !== null) ? this.props.state.channelState.editedChannelDescription.type : this.props.state.channelState.channelDescriptions[id].type
@@ -15,6 +15,8 @@ export class ChannelSelector extends Component {
             let used = this.props.state.channelState.selectedChannelList[id];
             let isInterior = (this.props.state.channelState.editedChannelDescription.isInterior !== null) ? this.props.state.channelState.editedChannelDescription.isInterior : this.props.state.channelState.channelDescriptions[id].isInterior
             let isCentered = (this.props.state.channelState.editedChannelDescription.isCentered !== null) ? this.props.state.channelState.editedChannelDescription.isCentered : this.props.state.channelState.channelDescriptions[id].isCentered
+            let height = (this.props.state.channelState.editedChannelDescription.height !== null) ? this.props.state.channelState.editedChannelDescription.height : this.props.state.channelState.channelDescriptions[id].height
+            let width = (this.props.state.channelState.editedChannelDescription.width !== null) ? this.props.state.channelState.editedChannelDescription.width : this.props.state.channelState.channelDescriptions[id].width;
             let status = await BlueToothCommands.updateChannel(
                 this.props.state.deviceState.selectedDevice,
                 id,
@@ -24,7 +26,9 @@ export class ChannelSelector extends Component {
                 order,
                 used,
                 isInterior,
-                isCentered
+                isCentered,
+                height,
+                width
             );
 
             if(status){
@@ -45,7 +49,9 @@ export class ChannelSelector extends Component {
                         position: null,
                         order: null,
                         isInterior: null,
-                        isCentered: null
+                        isCentered: null,
+                        height: null,
+                        width: null
                     }
                 );
             }
@@ -192,6 +198,30 @@ export class ChannelSelector extends Component {
         }
     }
 
+    updateHeight = (e) => {
+        if(this.props.state.channelState.editedChannelDescription !== null){
+            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
+            editedChannelDescription.height = parseInt(e.target.value);
+            this.props.stateUpdaters.updateChannelState(
+                this.props.state.channelState.selectedChannelList,
+                this.props.state.channelState.channelDescriptions,
+                editedChannelDescription
+            );
+        }
+    }
+
+    updateWidth = (e) => {
+        if(this.props.state.channelState.editedChannelDescription !== null){
+            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
+            editedChannelDescription.width = parseInt(e.target.value);
+            this.props.stateUpdaters.updateChannelState(
+                this.props.state.channelState.selectedChannelList,
+                this.props.state.channelState.channelDescriptions,
+                editedChannelDescription
+            );
+        }
+    }
+
     updateColorOrder = (e) => {
         if(this.props.state.channelState.editedChannelDescription !== null){
             let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
@@ -214,7 +244,9 @@ export class ChannelSelector extends Component {
                 position: null,
                 order: null,
                 isInterior: null,
-                isCentered: null
+                isCentered: null,
+                height: null,
+                width: null
             }
         }
         this.props.stateUpdaters.updateChannelState(
@@ -233,6 +265,40 @@ export class ChannelSelector extends Component {
             }else if(this.props.state.channelState.channelDescriptions !== null
                 && this.props.state.channelState.channelDescriptions[id].numLEDs !== null){
                 return this.props.state.channelState.channelDescriptions[id].numLEDs
+            }else{
+                return 0;
+            }
+        }else{
+            return 0;
+        }
+    }
+
+    getHeight = () => {
+        if(this.props.state.channelState.editedChannelDescription !== null){
+            let id = this.props.state.channelState.editedChannelDescription.id;
+            let height = this.props.state.channelState.editedChannelDescription.height;
+            if(height !== null){
+                return height
+            }else if(this.props.state.channelState.channelDescriptions !== null
+                && this.props.state.channelState.channelDescriptions[id].height !== null){
+                return this.props.state.channelState.channelDescriptions[id].height
+            }else{
+                return 0;
+            }
+        }else{
+            return 0;
+        }
+    }
+
+    getWidth = () => {
+        if(this.props.state.channelState.editedChannelDescription !== null){
+            let id = this.props.state.channelState.editedChannelDescription.id;
+            let width = this.props.state.channelState.editedChannelDescription.width;
+            if(width !== null){
+                return width
+            }else if(this.props.state.channelState.channelDescriptions !== null
+                && this.props.state.channelState.channelDescriptions[id].width !== null){
+                return this.props.state.channelState.channelDescriptions[id].width
             }else{
                 return 0;
             }
@@ -322,6 +388,18 @@ export class ChannelSelector extends Component {
                         <label className='column leftColumn'>LED Count:</label>
                         <div className="column">
                             <input className="channelTextInput rightColumn" type="text" name="numLEDs" value={this.getNumLEDsValue()} maxLength="3" onChange={this.updateNumLEDs}/> 
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <label className='column leftColumn'>Height:</label>
+                        <div className="column">
+                            <input className="channelTextInput rightColumn" type="text" name="height" value={this.getHeight()} maxLength="3" onChange={this.updateHeight}/> 
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <label className='column leftColumn'>Width:</label>
+                        <div className="column">
+                            <input className="channelTextInput rightColumn" type="text" name="width" value={this.getWidth()} maxLength="3" onChange={this.updateWidth}/> 
                         </div>
                     </div>
                     <div className='row'>

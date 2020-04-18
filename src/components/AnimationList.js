@@ -6,6 +6,7 @@ const animations = [
     "Blink",
     "Pulse",
     "Wave",
+    "Wave Alternate",
     "Roll",
     "Roll Alternate",
     "Stack",
@@ -31,8 +32,8 @@ export class AnimationList extends Component {
 
     updateDelayValue = (e) => {
         let delay = parseInt(e.target.value);
-        if(isNaN(delay)){
-            delay = 0;
+        if(isNaN(delay) || delay < 10){
+            delay = 10;
         }
         this.props.stateUpdaters.updateCommandState(this.props.state.commandState.animation, delay);
     }
@@ -49,7 +50,7 @@ export class AnimationList extends Component {
                     </label>
                 </div>
                 <div>
-                    <label className="inRowDisplayLabel">Delay:<input className="inRowDisplayInput indentText" type="number" type="text" name="delay" value={this.getDelayValue()} maxLength="4" onChange={this.updateDelayValue}/></label>
+                    <label className="inRowDisplayLabel">Delay:<input className="inRowDisplayInput indentText" type="number" min="10" name="delay" value={this.getDelayValue()} onChange={this.updateDelayValue}/></label>
                 </div>
             </div>
         )

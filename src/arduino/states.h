@@ -1,4 +1,7 @@
+
 #include <FlashStorage.h>
+
+int getNumUseablePositions(state* currentState, int channelIndex);
 
 bool getInteriorSwitchState();
 

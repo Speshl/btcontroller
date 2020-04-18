@@ -168,7 +168,9 @@ class App extends React.Component {
           order: descriptions[i].stripOrder,
           used: descriptions[i].stripUsed,
           isInterior: descriptions[i].isInterior,
-          isCentered: descriptions[i].isCentered
+          isCentered: descriptions[i].isCentered,
+          height: descriptions[i].height,
+          width: descriptions[i].width
         }
       }else{
         entry = {
@@ -179,7 +181,9 @@ class App extends React.Component {
           order: null,
           used: false,
           isInterior: false,
-          isCentered: false
+          isCentered: false,
+          height: null,
+          width: null
         }
       }
       returnArray.push(entry);
@@ -197,7 +201,7 @@ class App extends React.Component {
   }
 
   showDisplayBuilder = () =>{
-    if(this.state.deviceState.connectionStatus === 2){ //should check for 2 (connected), using 0 while in development
+    if(this.state.deviceState.connectionStatus === 0){ //should check for 2 (connected), using 0 while in development
       return (
         <React.Fragment>
           <DisplayBuilder state={this.state} stateUpdaters={this.stateUpdaters}/>

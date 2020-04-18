@@ -35,129 +35,32 @@ void staticCommand(state* currentState, bool alternate){
   Serial.println("Finished static command");
 }
 
-/*void pulseCommand(state* currentState){
-  Serial.println("Starting pulse command");
-  clearStrips();
-  
-  bool atTarget = false;
-  int curRed = 0;
-  int curGreen = 0;
-  int curBlue = 0;
-
-  while(!atTarget){//up Primary
-    if(curRed < currentState.dynamic.command.primaryRed){
-      curRed++;
-    }
-    if(curGreen < currentState.dynamic.command.primaryGreen){
-      curGreen++;
-    }
-    if(curBlue < currentState.dynamic.command.primaryBlue){
-      curBlue++;
-    }
-    if(curRed == currentState.dynamic.command.primaryRed && curGreen == currentState.dynamic.command.primaryGreen && curBlue == currentState.dynamic.command.primaryBlue){
-      atTarget = true;
-    }
-    uint32_t color = currentState.constant.strips[0]->Color(curRed, curGreen, curBlue);
-    for(int i=0; i<MAX_CHANNELS; i++){
-      if(isChannelActive(i) == true){
-        for(int j=0; j<currentState.dynamic.channels[i].numLEDs; j++){
-          currentState.constant.strips[i]->setPixelColor(j, color);
-        }
-        currentState.constant.strips[i]->show();
-      }
-    }
-    bool newCommand = delayAndPoll(currentState.dynamic.command.stepDelay);//delay should happen before next pixel changes
-    if(newCommand){
-      return;
-    }
-  }
-
-  atTarget = false;
-  while(!atTarget){//down primary
-    if(curRed > 0){
-      curRed--;
-    }
-    if(curGreen > 0){
-      curGreen--;
-    }
-    if(curBlue > 0){
-      curBlue--;
-    }
-    if(curRed == 0 && curGreen == 0 && curBlue == 0){
-      atTarget = true;
-    }
-    uint32_t color = currentState.constant.strips[0]->Color(curRed, curGreen, curBlue);
-    for(int i=0; i<MAX_CHANNELS; i++){
-      if(isChannelActive(i) == true){
-        for(int j=0; j<currentState.dynamic.channels[i].numLEDs; j++){
-          currentState.constant.strips[i]->setPixelColor(j, color);
-        }
-        currentState.constant.strips[i]->show();
-      }
-    }
-    delayAndPoll(currentState.dynamic.command.stepDelay);
-  }
-    atTarget = false;
-    while(!atTarget){//up Secondary
-    if(curRed < currentState.dynamic.command.secondaryRed){
-      curRed++;
-    }
-    if(curGreen < currentState.dynamic.command.secondaryGreen){
-      curGreen++;
-    }
-    if(curBlue < currentState.dynamic.command.secondaryBlue){
-      curBlue++;
-    }
-    if(curRed == currentState.dynamic.command.secondaryRed && curGreen == currentState.dynamic.command.secondaryGreen && curBlue == currentState.dynamic.command.secondaryBlue){
-      atTarget = true;
-    }
-    uint32_t color = currentState.constant.strips[0]->Color(curRed, curGreen, curBlue);
-    for(int i=0; i<MAX_CHANNELS; i++){
-      if(isChannelActive(i) == true){
-        for(int j=0; j<currentState.dynamic.channels[i].numLEDs; j++){
-          currentState.constant.strips[i]->setPixelColor(j, color);
-        }
-        currentState.constant.strips[i]->show();
-      }
-    }
-    bool newCommand = delayAndPoll(currentState.dynamic.command.stepDelay);//delay should happen before next pixel changes
-    if(newCommand){
-      return;
-    }
-  }
-
-  atTarget = false;
-  while(!atTarget){//down primary
-    if(curRed > 0){
-      curRed--;
-    }
-    if(curGreen > 0){
-      curGreen--;
-    }
-    if(curBlue > 0){
-      curBlue--;
-    }
-    if(curRed == 0 && curGreen == 0 && curBlue == 0){
-      atTarget = true;
-    }
-    uint32_t color = currentState.constant.strips[0]->Color(curRed, curGreen, curBlue);
-    for(int i=0; i<MAX_CHANNELS; i++){
-      if(isChannelActive(i) == true){
-        for(int j=0; j<currentState.dynamic.channels[i].numLEDs; j++){
-          currentState.constant.strips[i]->setPixelColor(j, color);
-        }
-        currentState.constant.strips[i]->show();
-      }
-    }
-    bool newCommand = delayAndPoll(currentState.dynamic.command.stepDelay);//delay should happen before next pixel changes
-    if(newCommand){
-      return;
-    }
-  }
-  Serial.println("Finished pulse command");
-}*/
-
 void waveCommand(state* currentState, bool alternate){
+  Serial.println("Started wave command");
+  uint32_t primaryColor;
+  uint32_t secondaryColor;
+  getColors(currentState, alternate, &primaryColor, &secondaryColor);
+  fillStrips(currentState, primaryColor);
+  
+  for(int row=0; row<NUM_ROWS; row++){
+    int mostUseablePositionsInRow = getLongestChannel(currentState, row);
+    for(int pos=0; pos<mostUseablePositionsInRow; pos++){ //loop over all possible addressable positions in row
+      bool changed = false;
+      changed = setStripColorAtPositionAcrossColumns(currentState, row, pos, secondaryColor); //set current position to the wave's color
+      if(changed){
+        bool newCommand = delayAndPoll(currentState, currentState->dynamic.command.stepDelay);//delay should happen before next pixel changes
+        if(newCommand){
+          return; //break out if new command detected
+        }else{ //turn off leds we turned on after the delay
+          setStripColorAtPositionAcrossColumns(currentState, row, pos, primaryColor); //set current position to the background color
+        }
+      }
+    }
+  }
+  Serial.println("Finished wave command");
+}
+
+/*void old_waveCommand(state* currentState, bool alternate){
   Serial.println("Started wave command");
   uint32_t primaryColor;
   uint32_t secondaryColor;
@@ -210,9 +113,32 @@ void waveCommand(state* currentState, bool alternate){
     }
   }
   Serial.println("Finished wave command");
-}
+}*/
 
 void rollCommand(state* currentState, bool alternate){
+  Serial.println("Started roll command");
+  uint32_t primaryColor;
+  uint32_t secondaryColor;
+  getColors(currentState, alternate, &primaryColor, &secondaryColor);
+  fillStrips(currentState, primaryColor);
+
+  for(int row=0; row<NUM_ROWS; row++){
+    int mostUseablePositionsInRow = getLongestChannel(currentState, row);
+    for(int pos=0; pos<mostUseablePositionsInRow; pos++){ //loop over all possible addressable positions in row
+      bool changed = false;
+      changed = setStripColorAtPositionAcrossColumns(currentState, row, pos, secondaryColor); //set current position to the wave's color
+      if(changed){
+        bool newCommand = delayAndPoll(currentState, currentState->dynamic.command.stepDelay);//delay should happen before next pixel changes
+        if(newCommand){
+          return; //break out if new command detected
+        }
+      }
+    }
+  }
+  Serial.println("Finished roll command");
+}
+
+/*void rollCommand(state* currentState, bool alternate){
   Serial.println("Started roll command");
   uint32_t primaryColor;
   uint32_t secondaryColor;
@@ -252,7 +178,7 @@ void rollCommand(state* currentState, bool alternate){
     }
   }
   Serial.println("Finished roll command");
-}
+}*/
 
 void stackCommand(state* currentState, bool alternate){
   Serial.println("Started stack command");
@@ -260,19 +186,19 @@ void stackCommand(state* currentState, bool alternate){
   uint32_t secondaryColor = 0;
 
   if(alternate){//will alterante which color is stacked after a full cycl
-    if( currentState->temp.lastRowUsed == 0 && currentState->temp.lastLEDUsed == 0){//completed a stack
+    if( currentState->temp.lastRowUsed == 0 && currentState->temp.lastPosUsed == 0){//completed a stack
       Serial.println("Swapping Primary Color");
       if(currentState->temp.stepIndex == 1){
-        Serial.println("Switching to alternate colors");
+        Serial.println("Using standard colors");
         currentState->temp.stepIndex = 0;
       }else{
-        Serial.println("Switching to standard colors");
+        Serial.println("Using alternate colors");
         currentState->temp.stepIndex = 1;
       } 
     }
   }
 
-  if(currentState->temp.stepIndex == 0 || alternate == false){
+  if(currentState->temp.stepIndex == 1 && alternate == true){
     Serial.println("Using alternate colors");
     primaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.secondaryRed, currentState->dynamic.command.secondaryGreen, currentState->dynamic.command.secondaryBlue);
     secondaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.primaryRed, currentState->dynamic.command.primaryGreen, currentState->dynamic.command.primaryBlue);
@@ -282,13 +208,13 @@ void stackCommand(state* currentState, bool alternate){
     secondaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.secondaryRed, currentState->dynamic.command.secondaryGreen, currentState->dynamic.command.secondaryBlue);
   }
   
-  if( currentState->temp.lastRowUsed == 0 && currentState->temp.lastLEDUsed == 0){ //reset to last led in last row
+  if( currentState->temp.lastRowUsed == 0 && currentState->temp.lastPosUsed == 0){ //reset to last led in last row
     fillStrips(currentState, primaryColor);
     Serial.println("Getting last row and channel");
     currentState->temp.lastRowUsed = getLastRow(currentState);
-    currentState->temp.lastLEDUsed = getLongestChannel(currentState, currentState->temp.lastRowUsed);
+    currentState->temp.lastPosUsed = getLongestChannel(currentState, currentState->temp.lastRowUsed);
   }else{
-    if(currentState->temp.lastLEDUsed == 0){
+    if(currentState->temp.lastPosUsed == 0){
       Serial.print("Row ");
       Serial.print(currentState->temp.lastRowUsed);
       Serial.println(" complete, getting next row");
@@ -297,7 +223,7 @@ void stackCommand(state* currentState, bool alternate){
         int nextChannel = getLongestChannel(currentState, i);
         if(nextChannel > 0){
           currentState->temp.lastRowUsed = i;
-          currentState->temp.lastLEDUsed = nextChannel;
+          currentState->temp.lastPosUsed = nextChannel;
           Serial.print("Next row is ");
           Serial.println(currentState->temp.lastRowUsed);
           break;
@@ -305,78 +231,40 @@ void stackCommand(state* currentState, bool alternate){
       }
     }else{
       Serial.println("Decrementing LED used");
-      currentState->temp.lastLEDUsed--;
+      currentState->temp.lastPosUsed--;
     }
   }
   
   Serial.print("Stacking Row ");
   Serial.println(currentState->temp.lastRowUsed);
   Serial.print("Stacking LED ");
-  Serial.println(currentState->temp.lastLEDUsed-1);
+  Serial.println(currentState->temp.lastPosUsed-1);
+  
   for(int row=0; row<NUM_ROWS; row++){
     if(row > currentState->temp.lastRowUsed){
       break;//don't need to update anymore
     }
-    Serial.print("Updating row ");
-    Serial.println(row);
-    showAllStrips(currentState);
-    int longestChannel = getLongestChannel(currentState, row);
-    for(int led=0; led<longestChannel; led++){
+    int mostUseablePositionsInRow = getLongestChannel(currentState, row);
+    for(int pos=0; pos<mostUseablePositionsInRow; pos++){ //loop over all possible addressable positions in row
       bool changed = false;//only want to delay if there was a change
-      for(int col=0; col<NUM_COLS; col++){
-        for(int channel=0; channel < MAX_CHANNELS; channel++){
-          int channelIndex = currentState->dynamic.mappedPositions[row][col][channel] - 1; //we added 1 to the index so we didn't lose it when storing, removing it here.  stores 1 or 0 if the channel is in this position
-          if(channelIndex >= 0 && isChannelActive(currentState, channelIndex) == true){//channelIndex will be -1 if there was no value stored there
-             if(currentState->dynamic.channels[channelIndex].numLEDs >= led){ //not at end of this strip
-                if(row <= currentState->temp.lastRowUsed){ //this row hasn't completed a stack yet
-                  if(row == currentState->temp.lastRowUsed && led >= currentState->temp.lastLEDUsed){//this led is already stacked so do nothing
-                    Serial.print("Channel ");
-                    Serial.print(channelIndex);
-                    Serial.print("'s ");
-                    Serial.print(led);
-                    Serial.println(" led is stacked");
-                  }else{//this led hasn't been stacked yet so apply updates
-                    changed = true;
-                    currentState->constant.strips[channelIndex]->setPixelColor(led, secondaryColor); //set current pixel to secondary color
-                    if(led != 0){
-                      currentState->constant.strips[channelIndex]->setPixelColor(led-1, primaryColor); //set previous led back to primary color
-                    }
-                    Serial.print("Setting channel ");
-                    Serial.print(channelIndex);
-                    Serial.print("'s ");
-                    Serial.print(led);
-                    Serial.println(" led to secondary color, and previous pixel to primary color");
-                  }
-                }
-             }else{//end of the strip if its not the longest strip in the row
-               if(row < currentState->temp.lastRowUsed){//if this row is below the last row used              
-                  currentState->constant.strips[channelIndex]->setPixelColor(currentState->dynamic.channels[channelIndex].numLEDs-1, primaryColor); //set last pixel in the strip back to primary Color, showing all strips at the start of next loops well display it and complete the animation
-                  Serial.print("Setting channel ");
-                  Serial.print(channelIndex);
-                  Serial.println("'s last pixel back to primaryColor, not the longest channel in the row");
-               }
-             }
-             currentState->constant.strips[channelIndex]->show();
-             if(led == longestChannel-1){  //on last led in the longest strip and will be switching rows next
-              if(row != currentState->temp.lastRowUsed){//stacking this led      
-                changed = true;
-                currentState->constant.strips[channelIndex]->setPixelColor(led, primaryColor);//go ahead and set the color back to primary on longest strip, will update all strips to set so we don't have to remember which strips
-                Serial.print("Setting channel ");
-                Serial.print(channelIndex);
-                Serial.print("'s last pixel(");
-                Serial.print(led);
-                Serial.println(") back to primaryColor before switching rows");
-              }
-             }
-          }
-        }
+      if(row == currentState->temp.lastRowUsed && pos >currentState->temp.lastPosUsed){
+        break;//This position is already stacked so skip, should hit this until row ends
       }
-      if(changed){ //if a pixel changes color
+      
+      changed = setStripColorAtPositionAcrossColumns(currentState, row, pos, secondaryColor);
+      if(changed){
         bool newCommand = delayAndPoll(currentState, currentState->dynamic.command.stepDelay);//delay should happen before next pixel changes
         if(newCommand){
-          return;
+          return; //break out if new command detected
         }
       }
+
+      if(row == currentState->temp.lastRowUsed && pos == currentState->temp.lastPosUsed){ //this is the position we are stacking
+        break;//don't need to set the color back
+      }else{
+        setStripColorAtPositionAcrossColumns(currentState, row, pos, primaryColor);//set position back to primary color after the delay
+      }
+      
     }
   }
   Serial.println("Finished stack command");
@@ -390,9 +278,6 @@ void runCommand(state* currentState) {
     case 1:
       staticCommand(currentState, true);
       break;
-    /*case 2:
-      pulseCommand(currentState);
-      break;*/
     case 3:
       waveCommand(currentState, false);
       break;

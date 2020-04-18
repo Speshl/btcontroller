@@ -146,7 +146,9 @@ export default class BlueToothCommands {
             stripType: uInt8Viewer[3],
             stripOrder: uInt8Viewer[4],
             stripPosition: uInt8Viewer[5],
-            numLEDs: uInt16Viewer[3] //TODO: Verify if this is correct
+            numLEDs: uInt16Viewer[3], //TODO: Verify if this is correct
+            height: uInt16Viewer[4],
+            width: uInt16Viewer[5]
         }
     }
 
@@ -164,7 +166,9 @@ export default class BlueToothCommands {
                 stripType: 0,
                 stripOrder: 0,
                 stripPosition: 0,
-                numLEDs: 0
+                numLEDs: 0,
+                height: 0,
+                width: 0
             }
         }
     }
@@ -202,7 +206,7 @@ export default class BlueToothCommands {
         }
     }
 
-    static updateChannel = async (server, channelIndex, stripType, numLEDs, position, order, used, isInterior, isCentered) => {
+    static updateChannel = async (server, channelIndex, stripType, numLEDs, position, order, used, isInterior, isCentered, height, width) => {
         try{
             if(!server.connected){
                 server = await server.connect();
@@ -210,10 +214,12 @@ export default class BlueToothCommands {
             let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
             let char = await service.getCharacteristic(serviceUUIDs.channelUUIDs[channelIndex]);
     
-            let buffer = new ArrayBuffer(2); //underlying buffer for both views
+            let buffer = new ArrayBuffer(6); //underlying buffer for both views
             let buffer16bit = new Uint16Array(buffer);
-            buffer16bit[0] = numLEDs; //put value in as 16 bit value
             let buffer8bit = new Uint8Array(buffer);
+            buffer16bit[0] = numLEDs; //put value in as 16 bit value
+            buffer16bit[1] = height;
+            buffer16bit[2] = width;
     
             let data = new Uint8Array([
                 isCentered,
@@ -223,7 +229,11 @@ export default class BlueToothCommands {
                 order,
                 position,
                 buffer8bit[0],
-                buffer8bit[1]
+                buffer8bit[1],
+                buffer8bit[2],
+                buffer8bit[3],
+                buffer8bit[4],
+                buffer8bit[5]
             ]);
             char.writeValue(data);
             return true;

@@ -35,6 +35,8 @@ typedef struct channelState{
   byte stripOrder; // 8 bit 2
   byte stripPosition; //8 bit 2
   word numLEDs; //16 bit 4
+  word height; //16 bit 4
+  word width; //16 bit 4
 };
 
 union channelUnion{
@@ -91,7 +93,7 @@ typedef struct tempState{
   bool interiorOn;
   bool lightsOn;
   word stepIndex;
-  word lastLEDUsed;
+  word lastPosUsed;
   int lastRowUsed;
 };
 
