@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import './../css/ChannelSelector.css';
 import BlueToothCommands from './../shared/BlueToothCommands';
-import { isTSAnyKeyword } from '@babel/types';
 
 export class ChannelSelector extends Component {
 
