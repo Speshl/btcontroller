@@ -201,7 +201,7 @@ class App extends React.Component {
   }
 
   showDisplayBuilder = () =>{
-    if(this.state.deviceState.connectionStatus === 0){ //should check for 2 (connected), using 0 while in development
+    if(this.state.deviceState.connectionStatus === 2){ //should check for 2 (connected), using 0 while in development
       return (
         <React.Fragment>
           <DisplayBuilder state={this.state} stateUpdaters={this.stateUpdaters}/>

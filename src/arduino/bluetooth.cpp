@@ -36,19 +36,21 @@ void setInitialCharacteristicValues(state* currentState){
 
 //todo: Update this to check for central and wait while connected. Currently times out when connecting to bluetooth
 bool delayAndPoll(state* currentState, int sleep){
+  Serial.println("Polling for state change");
   bool hasUpdated = false;
   unsigned long ulSleep = (unsigned long) sleep;
   unsigned long currentTime = millis();
   unsigned long targetTime = currentTime + ulSleep;
   while(targetTime > millis()){
     BLE.poll();
-  }
-  if(currentState->dynamic.hasUpdated == true){
-    Serial.println("Found new updated command, resetting temp command state.");
-    clearStrips(&(currentState->constant));
-    currentState->temp.stepIndex = 0;
-    currentState->dynamic.hasUpdated = false;
-    hasUpdated = true;
+    hasUpdated = updateTempState(currentState);
+    if(currentState->dynamic.hasUpdated == true || hasUpdated == true){
+      Serial.println("Found new updated command, resetting temp command state.");
+      clearStrips(&(currentState->constant));
+      currentState->temp.stepIndex = 0;
+      currentState->dynamic.hasUpdated = false;
+      hasUpdated = true;
+    }
   }
   return hasUpdated;
 }

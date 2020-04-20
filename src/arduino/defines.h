@@ -8,6 +8,7 @@
 #define UUID_LENGTH 37
 
 const int interiorTogglePin = 10;
+const int alternateCommandTogglePin = 11;
 const int outputPins[MAX_CHANNELS] = {2, 3, 4, 5, 6, 7, 8, 9};
 
 const char serviceUUID[UUID_LENGTH] = {"8d727090-093e-46a8-bf1d-23eeee2da202"};
@@ -91,6 +92,7 @@ typedef struct staticState{
 
 typedef struct tempState{
   bool interiorOn;
+  bool alternateCommand;
   bool lightsOn;
   word stepIndex;
   word lastPosUsed;

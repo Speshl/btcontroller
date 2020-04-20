@@ -90,7 +90,7 @@ void setInitialStrips(state* currentState){
 }
 
 //this function assumes strip start by going along the top row, down the left side, then back accross the bottom row and then up the right side to finish at the start
-bool setStripColorAtPositionWithHeight(state* currentState, int channelIndex, int led, uint32_t color){
+bool setStripColorAtPositionWithHeightCentered(state* currentState, int channelIndex, int led, uint32_t color){
   //LED max value should be half of width
   bool isWidthEven = currentState->dynamic.channels[channelIndex].width % 2 == 0;
   int topCenter = ceil(currentState->dynamic.channels[channelIndex].width / 2);
@@ -148,8 +148,13 @@ bool setStripColorAtPosition(state* currentState, int row, int col, int pos, uin
       if(isChannelActive(currentState, channelIndex) == true){//this channel is active and accepts updates
         if(currentState->dynamic.channels[channelIndex].isInterior == false || (currentState->dynamic.channels[channelIndex].isInterior == true && getInteriorSwitchState() == true)){ //channel is not interior, or if it is the interior switch is on
            if(pos < getNumUseablePositions(currentState, channelIndex)){// channel has an addressable led at that position
-            if(currentState->dynamic.channels[channelIndex].height > 1){//updates on this channel start in the center and work towards the end
-              updated = setStripColorAtPositionWithHeight(currentState, channelIndex, pos, color);
+            if(currentState->dynamic.channels[channelIndex].height > 1 && currentState->dynamic.channels[channelIndex].isCentered == true){//updates on this channel start in the center and work towards the end
+              updated = setStripColorAtPositionWithHeightCentered(currentState, channelIndex, pos, color);
+            }else if(currentState->dynamic.channels[channelIndex].height > 1 && currentState->dynamic.channels[channelIndex].isCentered == false){
+              updated = setStripColorAtPositionWithHeightCentered(currentState, channelIndex, pos, color);// make function for this case
+            }else if(currentState->dynamic.channels[channelIndex].height = 0 && currentState->dynamic.channels[channelIndex].isCentered == true){
+              currentState->constant.strips[channelIndex]->setPixelColor(pos, color);//make function for this case
+              updated = true;
             }else{
               currentState->constant.strips[channelIndex]->setPixelColor(pos, color);
               updated = true;

@@ -22,7 +22,15 @@ state* getCurrentState(){
 }
 
 bool getInteriorSwitchState() {
-  if(digitalRead(interiorTogglePin) == HIGH){//might need to update to be LOW
+  if(digitalRead(interiorTogglePin) == LOW){
+    return true;
+  }else{
+    return false;
+  }
+}
+
+bool getAlternateCommandSwitchState() {
+  if(digitalRead(alternateCommandTogglePin) == LOW){
     return true;
   }else{
     return false;
@@ -95,6 +103,7 @@ int getLastRow(state* currentState){
 
 void setInitialChannelState(dynamicState *dState) {
   Serial.println("Setting initial channel state");
+  dState->channels[0].isCentered = false;
   dState->channels[0].isInterior = false;
   dState->channels[0].stripUsed = true;
   dState->channels[0].stripType = 1;
@@ -104,6 +113,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[0].height = 1;
   dState->channels[0].width = 25;
 
+  dState->channels[1].isCentered = false;
   dState->channels[1].isInterior = false;
   dState->channels[1].stripUsed = true;
   dState->channels[1].stripType = 1;
@@ -113,6 +123,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[1].height = 1;
   dState->channels[1].width = 18;
 
+  dState->channels[2].isCentered = false;
   dState->channels[2].isInterior = false;
   dState->channels[2].stripUsed = true;
   dState->channels[2].stripType = 1;
@@ -122,6 +133,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[2].height = 1;
   dState->channels[2].width = 18;
 
+  dState->channels[3].isCentered = false;
   dState->channels[3].isInterior = false;
   dState->channels[3].stripUsed = false;
   dState->channels[3].stripType = 1;
@@ -131,6 +143,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[3].height = 1;
   dState->channels[3].width = 18;
 
+  dState->channels[4].isCentered = false;
   dState->channels[4].isInterior = true;
   dState->channels[4].stripUsed = false;
   dState->channels[4].stripType = 1;
@@ -140,6 +153,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[4].height = 1;
   dState->channels[4].width = 18;
 
+  dState->channels[5].isCentered = false;
   dState->channels[5].isInterior = false;
   dState->channels[5].stripUsed = true;
   dState->channels[5].stripType = 1;
@@ -149,6 +163,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[5].height = 1;
   dState->channels[5].width = 18;
 
+  dState->channels[6].isCentered = false;
   dState->channels[6].isInterior = false;
   dState->channels[6].stripUsed = true;
   dState->channels[6].stripType = 1;
@@ -158,6 +173,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[6].height = 1;
   dState->channels[6].width = 18;
 
+  dState->channels[7].isCentered = false;
   dState->channels[7].isInterior = false;
   dState->channels[7].stripUsed = true;
   dState->channels[7].stripType = 1;
@@ -166,6 +182,28 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[7].numLEDs = 25;
   dState->channels[7].height = 1;
   dState->channels[7].width = 25;
+}
+
+commandState getAlternateCommandState(){
+  commandState altCommand;
+  altCommand.primaryRed = 255;
+  altCommand.primaryGreen = 255;
+  altCommand.primaryBlue = 255;
+  altCommand.secondaryRed = 255;
+  altCommand.secondaryGreen = 255;
+  altCommand.secondaryBlue = 255;
+  altCommand.animation = 1;
+  altCommand.stepDelay = 999;
+  return altCommand;
+}
+
+commandState getCommand(state* currentState){
+  if(currentState->temp.alternateCommand == true){
+    Serial.println("Using Alternate Command");
+    return getAlternateCommandState();
+  }else{
+    return currentState->dynamic.command;
+  }
 }
 
 void setInitialCommandState(dynamicState *dState){
@@ -180,9 +218,26 @@ void setInitialCommandState(dynamicState *dState){
   dState->command.stepDelay = 100;
 }
 
+bool updateTempState(state *currentState){
+  bool previousInteriorOnState = currentState->temp.interiorOn;
+  currentState->temp.interiorOn = getInteriorSwitchState();
+  
+  bool previousAlternateCommandState = currentState->temp.alternateCommand;
+  currentState->temp.alternateCommand = getAlternateCommandSwitchState();
+
+  if(previousAlternateCommandState != currentState->temp.alternateCommand || previousInteriorOnState != currentState->temp.alternateCommand){
+    return true; //state changed
+  }else{
+    return false; //state not changed
+  }
+}
+
 void setInitialTempState(tempState *tState){
   Serial.println("Setting initial Temp state");
+  pinMode(interiorTogglePin, INPUT_PULLUP);
+  pinMode(alternateCommandTogglePin, INPUT_PULLUP);
   tState->interiorOn = getInteriorSwitchState();
+  tState->alternateCommand = getAlternateCommandSwitchState();
   tState->lightsOn = true;
   tState->stepIndex = 0;
   tState->lastRowUsed = 0;

@@ -54,8 +54,8 @@ export default class BlueToothCommands {
 
         let channelsData = [];
         for(let i=0; i< 8; i++){
-            let startIndex = 12+(8*i);
-            let endIndex = startIndex + 8;
+            let startIndex = 12+(12*i);
+            let endIndex = startIndex + 12;
             channelsData.push(this.readChannelData(data.buffer.slice(startIndex, endIndex)));
         }
         

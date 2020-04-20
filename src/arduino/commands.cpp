@@ -6,29 +6,31 @@
 #include "states.h"
 
 void getColors(state* currentState, bool alternate, uint32_t* primaryColor, uint32_t* secondaryColor){
+  commandState command = getCommand(currentState);
   if(alternate){
     if(currentState->temp.stepIndex == 1){
-      *primaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.secondaryRed, currentState->dynamic.command.secondaryGreen, currentState->dynamic.command.secondaryBlue);
-      *secondaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.primaryRed, currentState->dynamic.command.primaryGreen, currentState->dynamic.command.primaryBlue);
+      *primaryColor = currentState->constant.strips[0]->Color(command.secondaryRed, command.secondaryGreen, command.secondaryBlue);
+      *secondaryColor = currentState->constant.strips[0]->Color(command.primaryRed, command.primaryGreen, command.primaryBlue);
       currentState->temp.stepIndex = 0;
     }else{
       currentState->temp.stepIndex = 1;
-      *primaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.primaryRed, currentState->dynamic.command.primaryGreen, currentState->dynamic.command.primaryBlue);
-      *secondaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.secondaryRed, currentState->dynamic.command.secondaryGreen, currentState->dynamic.command.secondaryBlue);
+      *primaryColor = currentState->constant.strips[0]->Color(command.primaryRed, command.primaryGreen, command.primaryBlue);
+      *secondaryColor = currentState->constant.strips[0]->Color(command.secondaryRed, command.secondaryGreen, command.secondaryBlue);
     }
   }else{
-    *primaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.primaryRed, currentState->dynamic.command.primaryGreen, currentState->dynamic.command.primaryBlue);
-    *secondaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.secondaryRed, currentState->dynamic.command.secondaryGreen, currentState->dynamic.command.secondaryBlue);
+    *primaryColor = currentState->constant.strips[0]->Color(command.primaryRed, command.primaryGreen, command.primaryBlue);
+    *secondaryColor = currentState->constant.strips[0]->Color(command.secondaryRed, command.secondaryGreen, command.secondaryBlue);
   }
 }
 
 void staticCommand(state* currentState, bool alternate){
   Serial.println("Starting static command");
+  commandState command = getCommand(currentState);
   uint32_t primaryColor;
   uint32_t secondaryColor;
   getColors(currentState, alternate, &primaryColor, &secondaryColor);
   fillStrips(currentState, primaryColor);
-  bool newCommand = delayAndPoll(currentState, currentState->dynamic.command.stepDelay);//delay should happen before next pixel changes
+  bool newCommand = delayAndPoll(currentState, command.stepDelay);//delay should happen before next pixel changes
   if(newCommand){
     return;
   }
@@ -37,6 +39,7 @@ void staticCommand(state* currentState, bool alternate){
 
 void waveCommand(state* currentState, bool alternate){
   Serial.println("Started wave command");
+  commandState command = getCommand(currentState);
   uint32_t primaryColor;
   uint32_t secondaryColor;
   getColors(currentState, alternate, &primaryColor, &secondaryColor);
@@ -48,7 +51,7 @@ void waveCommand(state* currentState, bool alternate){
       bool changed = false;
       changed = setStripColorAtPositionAcrossColumns(currentState, row, pos, secondaryColor); //set current position to the wave's color
       if(changed){
-        bool newCommand = delayAndPoll(currentState, currentState->dynamic.command.stepDelay);//delay should happen before next pixel changes
+        bool newCommand = delayAndPoll(currentState, command.stepDelay);//delay should happen before next pixel changes
         if(newCommand){
           return; //break out if new command detected
         }else{ //turn off leds we turned on after the delay
@@ -117,6 +120,7 @@ void waveCommand(state* currentState, bool alternate){
 
 void rollCommand(state* currentState, bool alternate){
   Serial.println("Started roll command");
+  commandState command = getCommand(currentState);
   uint32_t primaryColor;
   uint32_t secondaryColor;
   getColors(currentState, alternate, &primaryColor, &secondaryColor);
@@ -128,7 +132,7 @@ void rollCommand(state* currentState, bool alternate){
       bool changed = false;
       changed = setStripColorAtPositionAcrossColumns(currentState, row, pos, secondaryColor); //set current position to the wave's color
       if(changed){
-        bool newCommand = delayAndPoll(currentState, currentState->dynamic.command.stepDelay);//delay should happen before next pixel changes
+        bool newCommand = delayAndPoll(currentState, command.stepDelay);//delay should happen before next pixel changes
         if(newCommand){
           return; //break out if new command detected
         }
@@ -182,6 +186,7 @@ void rollCommand(state* currentState, bool alternate){
 
 void stackCommand(state* currentState, bool alternate){
   Serial.println("Started stack command");
+  commandState command = getCommand(currentState);
   uint32_t primaryColor = 0;
   uint32_t secondaryColor = 0;
 
@@ -200,12 +205,12 @@ void stackCommand(state* currentState, bool alternate){
 
   if(currentState->temp.stepIndex == 1 && alternate == true){
     Serial.println("Using alternate colors");
-    primaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.secondaryRed, currentState->dynamic.command.secondaryGreen, currentState->dynamic.command.secondaryBlue);
-    secondaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.primaryRed, currentState->dynamic.command.primaryGreen, currentState->dynamic.command.primaryBlue);
+    primaryColor = currentState->constant.strips[0]->Color(command.secondaryRed, command.secondaryGreen, command.secondaryBlue);
+    secondaryColor = currentState->constant.strips[0]->Color(command.primaryRed, command.primaryGreen, command.primaryBlue);
   }else{
     Serial.println("Using standard colors");
-    primaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.primaryRed, currentState->dynamic.command.primaryGreen, currentState->dynamic.command.primaryBlue);
-    secondaryColor = currentState->constant.strips[0]->Color(currentState->dynamic.command.secondaryRed, currentState->dynamic.command.secondaryGreen, currentState->dynamic.command.secondaryBlue);
+    primaryColor = currentState->constant.strips[0]->Color(command.primaryRed, command.primaryGreen, command.primaryBlue);
+    secondaryColor = currentState->constant.strips[0]->Color(command.secondaryRed, command.secondaryGreen, command.secondaryBlue);
   }
   
   if( currentState->temp.lastRowUsed == 0 && currentState->temp.lastPosUsed == 0){ //reset to last led in last row
@@ -238,7 +243,7 @@ void stackCommand(state* currentState, bool alternate){
   Serial.print("Stacking Row ");
   Serial.println(currentState->temp.lastRowUsed);
   Serial.print("Stacking LED ");
-  Serial.println(currentState->temp.lastPosUsed-1);
+  Serial.println(currentState->temp.lastPosUsed);
   
   for(int row=0; row<NUM_ROWS; row++){
     if(row > currentState->temp.lastRowUsed){
@@ -253,7 +258,7 @@ void stackCommand(state* currentState, bool alternate){
       
       changed = setStripColorAtPositionAcrossColumns(currentState, row, pos, secondaryColor);
       if(changed){
-        bool newCommand = delayAndPoll(currentState, currentState->dynamic.command.stepDelay);//delay should happen before next pixel changes
+        bool newCommand = delayAndPoll(currentState, command.stepDelay);//delay should happen before next pixel changes
         if(newCommand){
           return; //break out if new command detected
         }
@@ -271,7 +276,8 @@ void stackCommand(state* currentState, bool alternate){
 }
 
 void runCommand(state* currentState) {
-  switch(currentState->dynamic.command.animation){
+  commandState command = getCommand(currentState);
+  switch(command.animation){
     case 0:
       staticCommand(currentState, false);
       break;

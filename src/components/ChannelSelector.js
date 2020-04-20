@@ -132,7 +132,9 @@ export class ChannelSelector extends Component {
                 position: null,
                 order: null,
                 isInterior: null,
-                isCentered: null
+                isCentered: null,
+                height: null,
+                width: null
             }
         );
     }

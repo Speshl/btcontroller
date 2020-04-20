@@ -5,6 +5,8 @@ int getNumUseablePositions(state* currentState, int channelIndex);
 
 bool getInteriorSwitchState();
 
+bool getAlternateCommandSwitchState();
+
 void mapPositions(dynamicState *dState);
 
 int getLastRow(state* currentState);
@@ -15,7 +17,13 @@ bool isChannelActive(state* currentState, int channelIndex);
 
 void setInitialTempState(tempState *tState);
 
+bool updateTempState(state *currentState);
+
 void setInitialDynamicState(dynamicState *dState);
+
+commandState getAlternateCommandState();
+
+commandState getCommand(state* currentState);
 
 void setInitialChannelState(dynamicState *dState);
 
