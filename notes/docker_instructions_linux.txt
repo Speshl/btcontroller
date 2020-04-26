@@ -1,0 +1,14 @@
+Within MINGW termianl Run the following command to create production build of application - npm run build
+
+Check build folder into github
+
+Login to VM (Your Name and password)
+
+Run command: cd ~/btcontroller
+
+Run command: git pull origin master
+
+Run command: cp -r /home/chaz/btcontroller/build/* /home/chaz/letsencrypt/www
+
+Can try to do docker stop and restart but it seems best to just restart the vm after
+
