@@ -43,6 +43,13 @@ bool delayAndPoll(state* currentState, int sleep){
   unsigned long targetTime = currentTime + ulSleep;
   while(targetTime > millis()){
     BLE.poll();
+    
+    bool previousSignalState = currentState->temp.lightsSaved; //this is true when a signal is on
+    bool currentSignalState = updateSignals(currentState); //updates signals and returns bool for if a signal is on
+    if(previousSignalState != currentSignalState){
+      return true;
+    }
+    
     hasUpdated = updateTempState(currentState);
     if(currentState->dynamic.hasUpdated == true || hasUpdated == true){
       Serial.println("Found new updated command, resetting temp command state.");
@@ -50,6 +57,7 @@ bool delayAndPoll(state* currentState, int sleep){
       currentState->temp.stepIndex = 0;
       currentState->dynamic.hasUpdated = false;
       hasUpdated = true;
+      return hasUpdated;//immediately drop out to process new command
     }
   }
   return hasUpdated;

@@ -11,7 +11,9 @@ void mapPositions(dynamicState *dState);
 
 int getLastRow(state* currentState);
 
-int getLongestChannel(state* currentState, int rowIndex);
+int getLongestChannelInLocation(state* currentState, int rowIndex, int colIndex);
+
+int getLongestChannelInRow(state* currentState, int rowIndex);
 
 bool isChannelActive(state* currentState, int channelIndex);
 
@@ -32,3 +34,11 @@ void setInitialCommandState(dynamicState *dState);
 state* getCurrentState();
 
 void saveState(dynamicState dState);
+
+bool updateSignals(state* currentState);
+
+bool updateRightTurnState(state* currentState);
+
+bool updateLeftTurnState(state* currentState);
+
+bool updateBrakeState(state* currentState);

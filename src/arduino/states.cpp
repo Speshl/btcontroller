@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <FlashStorage.h>
 #include "defines.h"
+#include "strips.h"
 
 state currentState;
 FlashStorage(flash_store, dynamicState);
@@ -31,6 +32,31 @@ bool getInteriorSwitchState() {
 
 bool getAlternateCommandSwitchState() {
   if(digitalRead(alternateCommandTogglePin) == LOW){
+    return true;
+  }else{
+    return false;
+  }
+}
+
+
+bool getLeftTurnSwitchState() {
+  if(digitalRead(leftTurnTogglePin) == LOW){
+    return true;
+  }else{
+    return false;
+  }
+}
+
+bool getRightTurnSwitchState() {
+  if(digitalRead(rightTurnTogglePin) == LOW){
+    return true;
+  }else{
+    return false;
+  }
+}
+
+bool getBrakeSwitchState() {
+  if(digitalRead(brakeTogglePin) == LOW){
     return true;
   }else{
     return false;
@@ -71,7 +97,26 @@ bool isChannelActive(state* currentState, int channelIndex){
   return false;
 }
 
-int getLongestChannel(state* currentState, int rowIndex){
+int getLongestChannelInLocation(state* currentState, int rowIndex, int colIndex){
+  int highestLEDCount = 0;
+  for(int j=0; j<MAX_CHANNELS; j++){
+    int channelIndex = currentState->dynamic.mappedPositions[rowIndex][colIndex][j]-1;//indexes stored in mapped positions are increased by 1, so decreasing to use
+    int numUseablePositions = getNumUseablePositions(currentState, channelIndex);
+    if(numUseablePositions > highestLEDCount  && isChannelActive(currentState, channelIndex) == true){
+        highestLEDCount = numUseablePositions;
+    }
+  }
+  Serial.print("Longest channel for location Row: ");
+  Serial.print(rowIndex);
+  Serial.print(" Col: ");
+  Serial.print(colIndex);
+  Serial.print(" has ");
+  Serial.print(highestLEDCount);
+  Serial.println(" leds");
+  return highestLEDCount;
+}
+
+int getLongestChannelInRow(state* currentState, int rowIndex){
   int highestLEDCount = 0;
   for(int i=0; i<NUM_COLS; i++){
     for(int j=0; j<MAX_CHANNELS; j++){
@@ -94,7 +139,7 @@ int getLongestChannel(state* currentState, int rowIndex){
 int getLastRow(state* currentState){
   int lastRow = 0;
   for(int i=0; i<NUM_ROWS; i++){
-    if(getLongestChannel(currentState, i) != 0){
+    if(getLongestChannelInRow(currentState, i) != 0){
       lastRow = i;
     }
   }
@@ -218,6 +263,56 @@ void setInitialCommandState(dynamicState *dState){
   dState->command.stepDelay = 100;
 }
 
+bool updateBrakeState(state* currentState){
+  bool previousBrakeState = currentState->temp.brakeLight;
+  currentState->temp.brakeLight = getBrakeSwitchState();
+  if(previousBrakeState != currentState->temp.brakeLight){
+    return true; //changed
+  }else{
+    return false;
+  }
+}
+
+bool updateLeftTurnState(state* currentState){
+  bool previousLeftTurnState = currentState->temp.leftTurnLight;
+  currentState->temp.leftTurnLight = getLeftTurnSwitchState();
+  if(previousLeftTurnState != currentState->temp.leftTurnLight){
+    return true; //changed
+  }else{
+    return false;
+  }
+}
+
+bool updateRightTurnState(state* currentState){
+  bool previousRightTurnState = currentState->temp.rightTurnLight;
+  currentState->temp.rightTurnLight = getRightTurnSwitchState();
+  if(previousRightTurnState != currentState->temp.rightTurnLight){
+    return true; //changed
+  }else{
+    return false;
+  }
+}
+
+bool updateSignals(state* currentState){
+  bool breakStateChanged = updateBrakeState(currentState);
+  bool leftTurnStateChanged = updateLeftTurnState(currentState);
+  bool rightTurnStateChanged = updateRightTurnState(currentState);
+
+  if(currentState->temp.brakeLight == true || currentState->temp.leftTurnLight == true || currentState->temp.rightTurnLight == true){//one of the signals is on after change
+    if(currentState->temp.lightsSaved == false){//a signal wasn't already on
+      currentState->temp.lightsSaved = true;
+      saveStripState(currentState);
+    }
+    return true;// signal is on
+  }else{//no signals are on after change
+    if(currentState->temp.lightsSaved == true){
+      currentState->temp.lightsSaved = false;
+      restoreStripState(currentState);
+    }
+    return false;//signal is off
+  }
+}
+
 bool updateTempState(state *currentState){
   bool previousInteriorOnState = currentState->temp.interiorOn;
   currentState->temp.interiorOn = getInteriorSwitchState();
@@ -225,6 +320,7 @@ bool updateTempState(state *currentState){
   bool previousAlternateCommandState = currentState->temp.alternateCommand;
   currentState->temp.alternateCommand = getAlternateCommandSwitchState();
 
+  bool signalsChanged = updateSignals(currentState);
   if(previousAlternateCommandState != currentState->temp.alternateCommand || previousInteriorOnState != currentState->temp.alternateCommand){
     return true; //state changed
   }else{
@@ -236,12 +332,19 @@ void setInitialTempState(tempState *tState){
   Serial.println("Setting initial Temp state");
   pinMode(interiorTogglePin, INPUT_PULLUP);
   pinMode(alternateCommandTogglePin, INPUT_PULLUP);
+  pinMode(leftTurnTogglePin, INPUT_PULLUP);
+  pinMode(rightTurnTogglePin, INPUT_PULLUP);
+  pinMode(brakeTogglePin, INPUT_PULLUP);
   tState->interiorOn = getInteriorSwitchState();
   tState->alternateCommand = getAlternateCommandSwitchState();
+  tState->leftTurnLight = getLeftTurnSwitchState();
+  tState->rightTurnLight = getRightTurnSwitchState();
+  tState->brakeLight = getBrakeSwitchState();
   tState->lightsOn = true;
   tState->stepIndex = 0;
   tState->lastRowUsed = 0;
   tState->lastPosUsed = 0;
+  tState->lightsSaved = false;
 }
 
 void setInitialDynamicState(dynamicState *dState){

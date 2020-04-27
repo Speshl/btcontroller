@@ -1,3 +1,4 @@
+void signalCommand(state* currentState);
 
 void runCommand(state* currentState);
 

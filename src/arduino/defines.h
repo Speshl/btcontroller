@@ -7,8 +7,13 @@
 #define NUM_COLS 3
 #define UUID_LENGTH 37
 
+#define SIGNAL_DELAY 500
+
 const int interiorTogglePin = 10;
 const int alternateCommandTogglePin = 11;
+const int leftTurnTogglePin = A0;
+const int rightTurnTogglePin = A1;
+const int brakeTogglePin = A2;
 const int outputPins[MAX_CHANNELS] = {2, 3, 4, 5, 6, 7, 8, 9};
 
 const char serviceUUID[UUID_LENGTH] = {"8d727090-093e-46a8-bf1d-23eeee2da202"};
@@ -91,12 +96,17 @@ typedef struct staticState{
 };
 
 typedef struct tempState{
+  bool leftTurnLight;
+  bool rightTurnLight;
+  bool brakeLight;
   bool interiorOn;
   bool alternateCommand;
   bool lightsOn;
   word stepIndex;
   word lastPosUsed;
   int lastRowUsed;
+  bool lightsSaved;
+  uint32_t savedLightState[MAX_CHANNELS][MAX_LEDS_PER_CHANNEL];
 };
 
 typedef struct state{

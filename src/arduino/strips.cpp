@@ -179,6 +179,17 @@ bool setStripColorAtPosition(state* currentState, int row, int col, int pos, uin
   return updated;
 }
 
+bool setStripColorAtLocation(state* currentState, int row, int col, uint32_t color){
+  bool updated = false;
+  int mostUseablePositionsInLocation = getLongestChannelInLocation(currentState, row, col);
+  for(int i=0; i<mostUseablePositionsInLocation; i++){ //apply change to all positions in this location
+    bool hadUpdate = setStripColorAtPosition(currentState, row, col, i, color);
+    if(hadUpdate){
+      updated = true;
+    }
+  }
+}
+
 
 bool setStripColorAtPositionAcrossColumns(state* currentState, int row, int pos, uint32_t color){
   bool updated = false;
@@ -189,4 +200,29 @@ bool setStripColorAtPositionAcrossColumns(state* currentState, int row, int pos,
     }
   }
   return updated;
+}
+
+uint32_t getColorOfChannelAtPosition(state* currentState, int channelIndex, int pos){
+  return currentState->constant.strips[channelIndex]->getPixelColor(pos);
+}
+
+void setColorOfChannelAtPosition(state* currentState, int channelIndex, int pos, uint32_t color){
+  currentState->constant.strips[channelIndex]->setPixelColor(pos, color);
+}
+
+void saveStripState(state* currentState){
+  memset(currentState->temp.savedLightState, 0, sizeof(currentState->temp.savedLightState));
+  for(int i=0; i<MAX_CHANNELS; i++){
+    for(int j=0; j< currentState->dynamic.channels[i].numLEDs; j++){
+      currentState->temp.savedLightState[i][j] = getColorOfChannelAtPosition(currentState, i, j);
+    }
+  }
+}
+
+void restoreStripState(state* currentState){
+  for(int i=0; i<MAX_CHANNELS; i++){
+    for(int j=0; j< currentState->dynamic.channels[i].numLEDs; j++){
+      setColorOfChannelAtPosition(currentState, i, j, currentState->temp.savedLightState[i][j]);
+    }
+  }
 }
