@@ -183,6 +183,7 @@ void signalCommand(state* currentState){
   uint32_t brakeColor = currentState->constant.strips[0]->Color(255, 0, 0);
   uint32_t turnColor = currentState->constant.strips[0]->Color(255, 125, 0);
   uint32_t offColor = currentState->constant.strips[0]->Color(0, 0, 0);
+  bool gotUpdate = false;
 
   if(currentState->temp.brakeLight == true && currentState->temp.leftTurnLight == true){// brake and left turn
 
@@ -194,13 +195,20 @@ void signalCommand(state* currentState){
       setStripColorAtLocation(currentState, i,0,turnColor);
     }
 
-    delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    gotUpdate = delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    if(gotUpdate == true){
+      return;
+    }
 
     for(int i=0; i<NUM_ROWS; i++){//turn signal off
       setStripColorAtLocation(currentState, i,0,offColor);
     }
 
     setStripColorAtLocation(currentState, NUM_ROWS-1, 0, brakeColor); //turn brake light back on where turn signal went off
+    gotUpdate = delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    if(gotUpdate == true){
+      return;
+    }
     
   }else if(currentState->temp.brakeLight == true && currentState->temp.rightTurnLight == true){// brake and right turn
     for(int i=0; i<NUM_COLS-1; i++){ //stop at cols-1 so we don't turn on brake instead of turn signal on right side
@@ -210,26 +218,61 @@ void signalCommand(state* currentState){
     for(int i=0; i<NUM_ROWS; i++){ //turn signal on
       setStripColorAtLocation(currentState, i, NUM_COLS-1, turnColor);
     }
-
-    delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    
+    gotUpdate = delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    if(gotUpdate == true){
+      return;
+    }
 
     for(int i=0; i<NUM_ROWS; i++){//turn signal off
       setStripColorAtLocation(currentState, i, NUM_COLS-1, offColor);
     }
 
     setStripColorAtLocation(currentState, NUM_ROWS-1, NUM_COLS-1, brakeColor); //turn brake light back on where turn signal went off
-    
-  }else if(currentState->temp.brakeLight == true){//brake
-    for(int i=0; i<NUM_COLS; i++){
-      setStripColorAtLocation(currentState, NUM_ROWS-1, i, brakeColor);
+    gotUpdate = delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    if(gotUpdate == true){
+      return;
     }
+    
   }else if(currentState->temp.leftTurnLight == true){//left turn
     for(int i=0; i<NUM_ROWS; i++){
       setStripColorAtLocation(currentState, i, 0, turnColor);
     }
+    
+    gotUpdate = delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    if(gotUpdate == true){
+      return;
+    }
+
+    for(int i=0; i<NUM_ROWS; i++){
+      setStripColorAtLocation(currentState, i, 0, offColor);
+    }
+    
+    gotUpdate = delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    if(gotUpdate == true){
+      return;
+    }
   }else if(currentState->temp.rightTurnLight == true){//right turn
     for(int i=0; i<NUM_ROWS; i++){
       setStripColorAtLocation(currentState, i, NUM_COLS-1, turnColor);
+    }
+    
+    gotUpdate = delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    if(gotUpdate == true){
+      return;
+    }
+
+    for(int i=0; i<NUM_ROWS; i++){
+      setStripColorAtLocation(currentState, i, NUM_COLS-1, offColor);
+    }
+    
+    gotUpdate = delayAndPoll(currentState, SIGNAL_DELAY);// delay with signal on
+    if(gotUpdate == true){
+      return;
+    }
+  }else if(currentState->temp.brakeLight == true){//brake
+    for(int i=0; i<NUM_COLS; i++){
+      setStripColorAtLocation(currentState, NUM_ROWS-1, i, brakeColor);
     }
   }
 }
