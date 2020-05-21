@@ -37,6 +37,7 @@ typedef struct channelState{
   boolean isCentered; //8 bit 2
   boolean isInterior; //8 bit 2
   boolean stripUsed; //8 bit 2
+  boolean directionFlipped;
   byte stripType; //8 bit 2
   byte stripOrder; // 8 bit 2
   byte stripPosition; //8 bit 2

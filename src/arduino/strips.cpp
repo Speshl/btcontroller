@@ -95,8 +95,14 @@ bool setStripColorAtPositionWithHeight(state* currentState, int channelIndex, in
     return false;
   }
   for(int i=0; i<currentState->dynamic.channels[channelIndex].height; i++){
-    int offset = currentState->dynamic.channels[channelIndex].width * i;
+    if(currentState->dynamic.channels[channelIndex].directionFlipped == true){
+      int offset = currentState->dynamic.channels[channelIndex].width * i;
+      offset = currentState->dynamic.channels[channelIndex].width - (led+offset+1); //start from the other side and add 1 because first pixel is 0 and width is end
     currentState->constant.strips[channelIndex]->setPixelColor(led + offset, color);
+    }else{
+      int offset = currentState->dynamic.channels[channelIndex].width * i;
+      currentState->constant.strips[channelIndex]->setPixelColor(led + offset, color);
+    }
   }
   return true;
 }
@@ -164,11 +170,21 @@ bool setStripColorAtPosition(state* currentState, int row, int col, int pos, uin
               updated = setStripColorAtPositionWithHeightCentered(currentState, channelIndex, pos, color);
             }else if(currentState->dynamic.channels[channelIndex].height > 1 && currentState->dynamic.channels[channelIndex].isCentered == false){
               updated = setStripColorAtPositionWithHeight(currentState, channelIndex, pos, color);// make function for this case
-            }else if(currentState->dynamic.channels[channelIndex].height = 0 && currentState->dynamic.channels[channelIndex].isCentered == true){
-              currentState->constant.strips[channelIndex]->setPixelColor(pos, color);//make function for this case
+            }else if(currentState->dynamic.channels[channelIndex].height == 0 && currentState->dynamic.channels[channelIndex].isCentered == true){
+              if(currentState->dynamic.channels[channelIndex].directionFlipped == true){
+                int offset = currentState->dynamic.channels[channelIndex].width - (pos+1); //start from the other end, add one to pos because it starts at 0
+                currentState->constant.strips[channelIndex]->setPixelColor(offset, color);//make function for this case
+              }else{
+                currentState->constant.strips[channelIndex]->setPixelColor(pos, color);//make function for this case
+              }
               updated = true;
             }else{
-              currentState->constant.strips[channelIndex]->setPixelColor(pos, color);
+              if(currentState->dynamic.channels[channelIndex].directionFlipped == true){
+                int offset = currentState->dynamic.channels[channelIndex].width - (pos+1); //start from the other end, add one to pos because it starts at 0
+                currentState->constant.strips[channelIndex]->setPixelColor(offset, color);
+              }else{
+                currentState->constant.strips[channelIndex]->setPixelColor(pos, color);
+              }
               updated = true;
             }
           }

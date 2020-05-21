@@ -26,13 +26,13 @@ bool getInteriorSwitchState() {
   if(digitalRead(interiorTogglePin) == LOW){
     return true;
   }else{
-    return false;
+    return true;//ALWAYS ON
   }
 }
 
 bool getAlternateCommandSwitchState() {
   if(digitalRead(alternateCommandTogglePin) == LOW){
-    return true;
+    return false;//DISABLED
   }else{
     return false;
   }
@@ -41,7 +41,7 @@ bool getAlternateCommandSwitchState() {
 
 bool getLeftTurnSwitchState() {
   if(digitalRead(leftTurnTogglePin) == LOW){
-    return true;
+    return false;//DISABLED
   }else{
     return false;
   }
@@ -49,7 +49,7 @@ bool getLeftTurnSwitchState() {
 
 bool getRightTurnSwitchState() {
   if(digitalRead(rightTurnTogglePin) == LOW){
-    return true;
+    return false;//DISABLED
   }else{
     return false;
   }
@@ -57,7 +57,7 @@ bool getRightTurnSwitchState() {
 
 bool getBrakeSwitchState() {
   if(digitalRead(brakeTogglePin) == LOW){
-    return true;
+    return false;//DISABLED
   }else{
     return false;
   }
@@ -151,6 +151,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[0].isCentered = false;
   dState->channels[0].isInterior = false;
   dState->channels[0].stripUsed = true;
+  dState->channels[0].directionFlipped = true;
   dState->channels[0].stripType = 1;
   dState->channels[0].stripOrder = 2;
   dState->channels[0].stripPosition = 9;
@@ -161,6 +162,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[1].isCentered = false;
   dState->channels[1].isInterior = false;
   dState->channels[1].stripUsed = true;
+  dState->channels[1].directionFlipped = true;
   dState->channels[1].stripType = 1;
   dState->channels[1].stripOrder = 5;
   dState->channels[1].stripPosition = 6;
@@ -171,6 +173,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[2].isCentered = false;
   dState->channels[2].isInterior = false;
   dState->channels[2].stripUsed = true;
+  dState->channels[2].directionFlipped = true;
   dState->channels[2].stripType = 1;
   dState->channels[2].stripOrder = 5;
   dState->channels[2].stripPosition = 0;
@@ -180,7 +183,8 @@ void setInitialChannelState(dynamicState *dState) {
 
   dState->channels[3].isCentered = false;
   dState->channels[3].isInterior = false;
-  dState->channels[3].stripUsed = false;
+  dState->channels[3].stripUsed = true;
+  dState->channels[3].directionFlipped = true;
   dState->channels[3].stripType = 1;
   dState->channels[3].stripOrder = 5;
   dState->channels[3].stripPosition = 4;
@@ -190,7 +194,8 @@ void setInitialChannelState(dynamicState *dState) {
 
   dState->channels[4].isCentered = false;
   dState->channels[4].isInterior = true;
-  dState->channels[4].stripUsed = false;
+  dState->channels[4].stripUsed = true;
+  dState->channels[4].directionFlipped = true;
   dState->channels[4].stripType = 1;
   dState->channels[4].stripOrder = 5;
   dState->channels[4].stripPosition = 4;
@@ -201,6 +206,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[5].isCentered = false;
   dState->channels[5].isInterior = false;
   dState->channels[5].stripUsed = true;
+  dState->channels[5].directionFlipped = true;
   dState->channels[5].stripType = 1;
   dState->channels[5].stripOrder = 5;
   dState->channels[5].stripPosition = 2;
@@ -211,6 +217,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[6].isCentered = false;
   dState->channels[6].isInterior = false;
   dState->channels[6].stripUsed = true;
+  dState->channels[6].directionFlipped = true;
   dState->channels[6].stripType = 1;
   dState->channels[6].stripOrder = 5;
   dState->channels[6].stripPosition = 8;
@@ -221,6 +228,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[7].isCentered = false;
   dState->channels[7].isInterior = false;
   dState->channels[7].stripUsed = true;
+  dState->channels[7].directionFlipped = true;
   dState->channels[7].stripType = 1;
   dState->channels[7].stripOrder = 2;
   dState->channels[7].stripPosition = 11;
