@@ -89,13 +89,47 @@ void setInitialStrips(state* currentState){
   }
 }
 
+bool setStripColorAtPositionNoHeight(state* currentState, int channelIndex, int led, uint32_t color){
+  Serial.println("Strip is standard");
+  if(currentState->dynamic.channels[channelIndex].directionFlipped == true){
+    Serial.println("Strip is reversed");
+    int offset = currentState->dynamic.channels[channelIndex].width - (led+1); //start from the other end, add one to pos because it starts at 0
+    Serial.print("Setting pixel at index ");
+    Serial.print(offset);
+    Serial.print(" on strip");
+    currentState->constant.strips[channelIndex]->setPixelColor(offset, color);
+  }else{
+    Serial.print("Setting pixel at index ");
+    Serial.print(led);
+    Serial.print(" on strip");
+    currentState->constant.strips[channelIndex]->setPixelColor(led, color);
+  }
+  currentState->constant.strips[channelIndex]->show();
+  return true;
+}
+
+bool setStripColorAtPositionNoHeightCentered(state* currentState, int channelIndex, int led, uint32_t color){
+  Serial.println("Strip is centered");
+  if(currentState->dynamic.channels[channelIndex].directionFlipped == true){
+    int offset = currentState->dynamic.channels[channelIndex].width - (led+1); //start from the other end, add one to pos because it starts at 0
+    Serial.println("Strip is reversed");
+    currentState->constant.strips[channelIndex]->setPixelColor(offset, color);//make function for this case
+  }else{
+    currentState->constant.strips[channelIndex]->setPixelColor(led, color);//make function for this case
+  }
+  currentState->constant.strips[channelIndex]->show();
+  return true;
+}
+
 //this function assumes the strip starts on one side and goes evenly to the other side
 bool setStripColorAtPositionWithHeight(state* currentState, int channelIndex, int led, uint32_t color){
+  Serial.println("Strip has a height");
   if(led >= currentState->dynamic.channels[channelIndex].width){//led index is out of bounds
     return false;
   }
   for(int i=0; i<currentState->dynamic.channels[channelIndex].height; i++){
     if(currentState->dynamic.channels[channelIndex].directionFlipped == true){
+      Serial.println("Strip is reversed");
       int offset = currentState->dynamic.channels[channelIndex].width * i;
       offset = currentState->dynamic.channels[channelIndex].width - (led+offset+1); //start from the other side and add 1 because first pixel is 0 and width is end
     currentState->constant.strips[channelIndex]->setPixelColor(led + offset, color);
@@ -104,11 +138,13 @@ bool setStripColorAtPositionWithHeight(state* currentState, int channelIndex, in
       currentState->constant.strips[channelIndex]->setPixelColor(led + offset, color);
     }
   }
+  currentState->constant.strips[channelIndex]->show();
   return true;
 }
 
 //this function assumes strip start by going along the top row, down the left side, then back accross the bottom row and then up the right side to finish at the start
 bool setStripColorAtPositionWithHeightCentered(state* currentState, int channelIndex, int led, uint32_t color){
+  Serial.println("Strip is centered and has a height");
   //LED max value should be half of width
   bool isWidthEven = currentState->dynamic.channels[channelIndex].width % 2 == 0;
   int topCenter = ceil(currentState->dynamic.channels[channelIndex].width / 2);
@@ -150,12 +186,13 @@ bool setStripColorAtPositionWithHeightCentered(state* currentState, int channelI
       }
     }
   }
+  currentState->constant.strips[channelIndex]->show();
   return true;
 }
 
 bool setStripColorAtPosition(state* currentState, int row, int col, int pos, uint32_t color){
   bool updated = false;
-  if( row <= 0 || col <= 0 || pos <= 0){
+  if( row < 0 || col < 0 || pos < 0){
     return updated;
   }
   
@@ -166,26 +203,20 @@ bool setStripColorAtPosition(state* currentState, int row, int col, int pos, uin
       if(isChannelActive(currentState, channelIndex) == true){//this channel is active and accepts updates
         if(currentState->dynamic.channels[channelIndex].isInterior == false || (currentState->dynamic.channels[channelIndex].isInterior == true && getInteriorSwitchState() == true)){ //channel is not interior, or if it is the interior switch is on
            if(pos < getNumUseablePositions(currentState, channelIndex)){// channel has an addressable led at that position
+            Serial.print("Writing Update to LED Position - Row: ");
+            Serial.print(row);
+            Serial.print(" Col: ");
+            Serial.print(col);
+            Serial.print(" Position: ");
+            Serial.println(pos);
             if(currentState->dynamic.channels[channelIndex].height > 1 && currentState->dynamic.channels[channelIndex].isCentered == true){//updates on this channel start in the center and work towards the end
               updated = setStripColorAtPositionWithHeightCentered(currentState, channelIndex, pos, color);
             }else if(currentState->dynamic.channels[channelIndex].height > 1 && currentState->dynamic.channels[channelIndex].isCentered == false){
               updated = setStripColorAtPositionWithHeight(currentState, channelIndex, pos, color);// make function for this case
             }else if(currentState->dynamic.channels[channelIndex].height == 0 && currentState->dynamic.channels[channelIndex].isCentered == true){
-              if(currentState->dynamic.channels[channelIndex].directionFlipped == true){
-                int offset = currentState->dynamic.channels[channelIndex].width - (pos+1); //start from the other end, add one to pos because it starts at 0
-                currentState->constant.strips[channelIndex]->setPixelColor(offset, color);//make function for this case
-              }else{
-                currentState->constant.strips[channelIndex]->setPixelColor(pos, color);//make function for this case
-              }
-              updated = true;
+              updated = setStripColorAtPositionNoHeightCentered(currentState, channelIndex, pos, color);
             }else{
-              if(currentState->dynamic.channels[channelIndex].directionFlipped == true){
-                int offset = currentState->dynamic.channels[channelIndex].width - (pos+1); //start from the other end, add one to pos because it starts at 0
-                currentState->constant.strips[channelIndex]->setPixelColor(offset, color);
-              }else{
-                currentState->constant.strips[channelIndex]->setPixelColor(pos, color);
-              }
-              updated = true;
+              updated = setStripColorAtPositionNoHeight(currentState, channelIndex, pos, color);
             }
           }
         }

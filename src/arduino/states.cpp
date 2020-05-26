@@ -147,94 +147,94 @@ int getLastRow(state* currentState){
 }
 
 void setInitialChannelState(dynamicState *dState) {
-  Serial.println("Setting initial channel state");
+  Serial.println("Setting initial channel state");//Front Right Rock Light
   dState->channels[0].isCentered = false;
   dState->channels[0].isInterior = false;
   dState->channels[0].stripUsed = true;
   dState->channels[0].directionFlipped = true;
   dState->channels[0].stripType = 1;
-  dState->channels[0].stripOrder = 2;
-  dState->channels[0].stripPosition = 9;
-  dState->channels[0].numLEDs = 25;
+  dState->channels[0].stripOrder = 5;
+  dState->channels[0].stripPosition = 2;
+  dState->channels[0].numLEDs = 18;
   dState->channels[0].height = 1;
-  dState->channels[0].width = 25;
+  dState->channels[0].width = 18;
 
-  dState->channels[1].isCentered = false;
-  dState->channels[1].isInterior = false;
+  dState->channels[1].isCentered = false;//Right Interior Light
+  dState->channels[1].isInterior = true;
   dState->channels[1].stripUsed = true;
   dState->channels[1].directionFlipped = true;
   dState->channels[1].stripType = 1;
   dState->channels[1].stripOrder = 5;
-  dState->channels[1].stripPosition = 6;
+  dState->channels[1].stripPosition = 4;
   dState->channels[1].numLEDs = 18;
   dState->channels[1].height = 1;
   dState->channels[1].width = 18;
 
-  dState->channels[2].isCentered = false;
+  dState->channels[2].isCentered = false;//Right Whip
   dState->channels[2].isInterior = false;
   dState->channels[2].stripUsed = true;
-  dState->channels[2].directionFlipped = true;
+  dState->channels[2].directionFlipped = false;
   dState->channels[2].stripType = 1;
-  dState->channels[2].stripOrder = 5;
-  dState->channels[2].stripPosition = 0;
-  dState->channels[2].numLEDs = 18;
+  dState->channels[2].stripOrder = 2;
+  dState->channels[2].stripPosition = 8;
+  dState->channels[2].numLEDs = 25;
   dState->channels[2].height = 1;
-  dState->channels[2].width = 18;
+  dState->channels[2].width = 25;
 
-  dState->channels[3].isCentered = false;
+  dState->channels[3].isCentered = false; //Right rear rock light
   dState->channels[3].isInterior = false;
   dState->channels[3].stripUsed = true;
   dState->channels[3].directionFlipped = true;
   dState->channels[3].stripType = 1;
   dState->channels[3].stripOrder = 5;
-  dState->channels[3].stripPosition = 4;
+  dState->channels[3].stripPosition = 11;
   dState->channels[3].numLEDs = 18;
   dState->channels[3].height = 1;
   dState->channels[3].width = 18;
 
-  dState->channels[4].isCentered = false;
+  dState->channels[4].isCentered = false;//Left Rear Rock Light
   dState->channels[4].isInterior = true;
   dState->channels[4].stripUsed = true;
   dState->channels[4].directionFlipped = true;
   dState->channels[4].stripType = 1;
   dState->channels[4].stripOrder = 5;
-  dState->channels[4].stripPosition = 4;
+  dState->channels[4].stripPosition = 9;
   dState->channels[4].numLEDs = 18;
   dState->channels[4].height = 1;
   dState->channels[4].width = 18;
 
-  dState->channels[5].isCentered = false;
+  dState->channels[5].isCentered = false;//Left Whip
   dState->channels[5].isInterior = false;
   dState->channels[5].stripUsed = true;
-  dState->channels[5].directionFlipped = true;
+  dState->channels[5].directionFlipped = false;
   dState->channels[5].stripType = 1;
-  dState->channels[5].stripOrder = 5;
-  dState->channels[5].stripPosition = 2;
-  dState->channels[5].numLEDs = 18;
+  dState->channels[5].stripOrder = 2;
+  dState->channels[5].stripPosition = 6;
+  dState->channels[5].numLEDs = 25;
   dState->channels[5].height = 1;
-  dState->channels[5].width = 18;
+  dState->channels[5].width = 25;
 
-  dState->channels[6].isCentered = false;
-  dState->channels[6].isInterior = false;
+  dState->channels[6].isCentered = false; //Left Interior
+  dState->channels[6].isInterior = true;
   dState->channels[6].stripUsed = true;
   dState->channels[6].directionFlipped = true;
   dState->channels[6].stripType = 1;
   dState->channels[6].stripOrder = 5;
-  dState->channels[6].stripPosition = 8;
+  dState->channels[6].stripPosition = 4;
   dState->channels[6].numLEDs = 18;
   dState->channels[6].height = 1;
   dState->channels[6].width = 18;
 
-  dState->channels[7].isCentered = false;
+  dState->channels[7].isCentered = false;// Left Front Rock Light
   dState->channels[7].isInterior = false;
   dState->channels[7].stripUsed = true;
   dState->channels[7].directionFlipped = true;
   dState->channels[7].stripType = 1;
-  dState->channels[7].stripOrder = 2;
-  dState->channels[7].stripPosition = 11;
-  dState->channels[7].numLEDs = 25;
+  dState->channels[7].stripOrder = 5;
+  dState->channels[7].stripPosition = 0;
+  dState->channels[7].numLEDs = 18;
   dState->channels[7].height = 1;
-  dState->channels[7].width = 25;
+  dState->channels[7].width = 18;
 }
 
 commandState getAlternateCommandState(){
@@ -267,8 +267,8 @@ void setInitialCommandState(dynamicState *dState){
   dState->command.secondaryRed = 255;
   dState->command.secondaryGreen = 0;
   dState->command.secondaryBlue = 255;
-  dState->command.animation = 8;
-  dState->command.stepDelay = 100;
+  dState->command.animation = 8;// Stack Alternate: 8
+  dState->command.stepDelay = 10;
 }
 
 bool updateBrakeState(state* currentState){
@@ -329,7 +329,7 @@ bool updateTempState(state *currentState){
   currentState->temp.alternateCommand = getAlternateCommandSwitchState();
 
   bool signalsChanged = updateSignals(currentState);
-  if(previousAlternateCommandState != currentState->temp.alternateCommand || previousInteriorOnState != currentState->temp.alternateCommand){
+  if(previousAlternateCommandState != currentState->temp.alternateCommand || previousInteriorOnState != currentState->temp.interiorOn){
     return true; //state changed
   }else{
     return false; //state not changed

@@ -37,6 +37,68 @@ void staticCommand(state* currentState, bool alternate){
   Serial.println("Finished static command");
 }
 
+void breathCommand(state* currentState, bool alternate){
+  Serial.println("Starting breath command");
+  commandState command = getCommand(currentState);
+  uint32_t primaryColor;
+  uint32_t secondaryColor;
+  getColors(currentState, alternate, &primaryColor, &secondaryColor);
+  
+  uint32_t currentColor;
+  byte currentRed = 0;
+  byte currentGreen = 0;
+  byte currentBlue = 0;
+
+  secondaryColor = currentState->constant.strips[0]->Color(currentRed, currentGreen, currentBlue);
+
+  for(int i=0; i<256; i++){ //at most 256 steps between no color and target color (GOING UP)
+    if(currentRed < command.primaryRed){
+      currentRed++;
+    }
+    if(currentGreen < command.primaryGreen){
+      currentGreen++;
+    }
+    if(currentBlue < command.primaryBlue){
+      currentBlue++;
+    }
+    currentColor = currentState->constant.strips[0]->Color(currentRed, currentGreen, currentBlue);
+    fillStrips(currentState, currentColor);
+    
+    bool newCommand = delayAndPoll(currentState, command.stepDelay);//delay should happen before next pixel changes
+    if(newCommand){
+      return;
+    }
+    
+    if(currentColor == primaryColor){//At target color
+      break;//at target so stop going up
+    }
+  }
+
+  for(int i=0; i<256; i++){ //at most 256 steps between no color and target color (GOING DOWN)
+    if(currentRed > 0){
+      currentRed--;
+    }
+    if(currentGreen > 0){
+      currentGreen--;
+    }
+    if(currentBlue > 0){
+      currentBlue--;
+    }
+    currentColor = currentState->constant.strips[0]->Color(currentRed, currentGreen, currentBlue);
+    fillStrips(currentState, currentColor);
+    
+    bool newCommand = delayAndPoll(currentState, command.stepDelay);//delay should happen before next pixel changes
+    if(newCommand){
+      return;
+    }
+    
+    if(currentColor == secondaryColor){//At target color (off)
+      break;//at target so stop going up
+    }
+  }
+  
+}
+
 void waveCommand(state* currentState, bool alternate){
   Serial.println("Started wave command");
   commandState command = getCommand(currentState);
@@ -279,9 +341,9 @@ void signalCommand(state* currentState){
 
 void runCommand(state* currentState) {
   commandState command = getCommand(currentState);
-  if(currentState->temp.brakeLight == true || currentState->temp.leftTurnLight == true || currentState->temp.rightTurnLight == true){//handle signals
+  /*if(currentState->temp.brakeLight == true || currentState->temp.leftTurnLight == true || currentState->temp.rightTurnLight == true){//handle signals
     signalCommand(currentState);
-  }else{
+  }else{*/
     switch(command.animation){
       case 0:
         staticCommand(currentState, false);
@@ -289,26 +351,32 @@ void runCommand(state* currentState) {
       case 1:
         staticCommand(currentState, true);
         break;
+      case 2:
+        breathCommand(currentState, false);
+        break;
       case 3:
-        waveCommand(currentState, false);
+        breathCommand(currentState, true);
         break;
       case 4:
-        waveCommand(currentState, true);
+        waveCommand(currentState, false);
         break;
       case 5:
-        rollCommand(currentState, false);
+        waveCommand(currentState, true);
         break;
       case 6:
-        rollCommand(currentState, true);
+        rollCommand(currentState, false);
         break;
       case 7:
-        stackCommand(currentState, false);
+        rollCommand(currentState, true);
         break;
       case 8:
+        stackCommand(currentState, false);
+        break;
+      case 9:
         stackCommand(currentState, true);
         break;
       default:
         staticCommand(currentState, false);
     }
-  }
+  //}
 }
