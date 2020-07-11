@@ -9,6 +9,7 @@
 void updateBulkReadChar(state* currentState){
   bulkReadUnion bulkReadConverter;
   bulkReadConverter.packet.on = currentState->temp.lightsOn;
+  bulkReadConverter.packet.interiorOn = currentState->temp.interiorOn;
   bulkReadConverter.packet.command = currentState->dynamic.command;
   memcpy(bulkReadConverter.packet.channels, currentState->dynamic.channels, sizeof(currentState->dynamic.channels));
   //bulkReadConverter.packet.channels = currentState->dynamic.channels;
@@ -19,6 +20,7 @@ void setInitialCharacteristicValues(state* currentState){
   Serial.println("Start setting initial service values");
 
   currentState->constant.on->writeValue(currentState->temp.lightsOn);
+  currentState->constant.interiorOn->writeValue(currentState->temp.interiorOn);
   
   commandUnion commandConverter;
   commandConverter.packet = currentState->dynamic.command;
@@ -36,7 +38,7 @@ void setInitialCharacteristicValues(state* currentState){
 
 //todo: Update this to check for central and wait while connected. Currently times out when connecting to bluetooth
 bool delayAndPoll(state* currentState, int sleep){
-  Serial.println("Polling for state change");
+  //Serial.println("Polling for state change");
   bool hasUpdated = false;
   unsigned long ulSleep = (unsigned long) sleep;
   unsigned long currentTime = millis();
@@ -75,13 +77,26 @@ void saveDynamicState(BLEDevice central, BLECharacteristic characteristic){
 
 void toggleLights(BLEDevice central, BLECharacteristic characteristic){
   state* currentState = getCurrentState();
-  Serial.println("New light stats value found");
+  Serial.println("New light state value found");
   if(currentState->constant.on->value() == true){
     Serial.println("Turning lights on");
     currentState->temp.lightsOn = true;
   }else{
     Serial.println("Turning lights off");
     currentState->temp.lightsOn = false;
+  }
+  updateBulkReadChar(currentState);
+}
+
+void toggleInteriorLights(BLEDevice central, BLECharacteristic characteristic){
+  state* currentState = getCurrentState();
+  Serial.println("New interior light stats value found");
+  if(currentState->constant.interiorOn->value() == true){
+    Serial.println("Turning interior lights on");
+    currentState->temp.interiorOn = true;
+  }else{
+    Serial.println("Turning interior lights off");
+    currentState->temp.interiorOn = false;
   }
   updateBulkReadChar(currentState);
 }
@@ -138,6 +153,10 @@ void setupService(staticState* sState){
   sState->on = new BLEBoolCharacteristic(characteristicUUIDs[1], BLERead | BLEWrite);
   sState->on->setEventHandler(BLEWritten, toggleLights);
   sState->data->addCharacteristic(*sState->on);
+  
+  sState->interiorOn = new BLEBoolCharacteristic(characteristicUUIDs[12], BLERead | BLEWrite);
+  sState->interiorOn->setEventHandler(BLEWritten, toggleInteriorLights);
+  sState->data->addCharacteristic(*sState->interiorOn);
 
   sState->command = new BLECharacteristic(characteristicUUIDs[2], BLERead | BLEWrite, sizeof(commandState), 512);
   sState->command->setEventHandler(BLEWritten, updateCommand);

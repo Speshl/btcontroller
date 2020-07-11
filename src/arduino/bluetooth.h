@@ -11,6 +11,8 @@ void saveDynamicState(BLEDevice central, BLECharacteristic characteristic);
 
 void toggleLights(BLEDevice central, BLECharacteristic characteristic);
 
+void toggleInteriorLights(BLEDevice central, BLECharacteristic characteristic);
+
 void updateCommand(BLEDevice central, BLECharacteristic characteristic);
 
 void updateChannel(BLEDevice central, BLECharacteristic characteristic);

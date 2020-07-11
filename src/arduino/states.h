@@ -5,6 +5,8 @@ int getNumUseablePositions(state* currentState, int channelIndex);
 
 bool getInteriorSwitchState();
 
+bool getInteriorLightState(state* currentState);
+
 bool getAlternateCommandSwitchState();
 
 void mapPositions(dynamicState *dState);

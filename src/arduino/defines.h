@@ -18,7 +18,7 @@ const int outputPins[MAX_CHANNELS] = {2, 3, 4, 5, 6, 7, 8, 9};
 
 const char serviceUUID[UUID_LENGTH] = {"8d727090-093e-46a8-bf1d-23eeee2da202"};
 
-const char characteristicUUIDs[12][UUID_LENGTH] = {
+const char characteristicUUIDs[13][UUID_LENGTH] = {
   "8d727091-093e-46a8-bf1d-23eeee2da202", //save
   "8d727092-093e-46a8-bf1d-23eeee2da202", //on
   "8d727093-093e-46a8-bf1d-23eeee2da202", //command
@@ -30,14 +30,15 @@ const char characteristicUUIDs[12][UUID_LENGTH] = {
   "8d727099-093e-46a8-bf1d-23eeee2da202", //channel 5
   "8d72709a-093e-46a8-bf1d-23eeee2da202", //channel 6
   "8d72709b-093e-46a8-bf1d-23eeee2da202", //channel 7
-  "8d72709c-093e-46a8-bf1d-23eeee2da202" //channel 8
+  "8d72709c-093e-46a8-bf1d-23eeee2da202", //channel 8
+  "8d72709d-093e-46a8-bf1d-23eeee2da202" //interiorOn
 };
 
 typedef struct channelState{
   boolean isCentered; //8 bit 2
   boolean isInterior; //8 bit 2
   boolean stripUsed; //8 bit 2
-  boolean directionFlipped;
+  boolean directionFlipped; // 8 bit 2
   byte stripType; //8 bit 2
   byte stripOrder; // 8 bit 2
   byte stripPosition; //8 bit 2
@@ -69,6 +70,7 @@ union commandUnion{
 
 typedef struct bulkRead{
   bool on;
+  bool interiorOn;
   commandState command;
   channelState channels[MAX_CHANNELS];
 };
@@ -89,6 +91,7 @@ typedef struct dynamicState{
 typedef struct staticState{
   BLEService *data;
   BLEBoolCharacteristic *on;
+  BLEBoolCharacteristic *interiorOn;
   BLEBoolCharacteristic *save;
   BLECharacteristic *command;
   BLECharacteristic *channels[MAX_CHANNELS];

@@ -157,58 +157,58 @@ void stackCommand(state* currentState, bool alternate){
 
   if(alternate){//will alterante which color is stacked after a full cycl
     if( currentState->temp.lastRowUsed == 0 && currentState->temp.lastPosUsed == 0){//completed a stack
-      Serial.println("Swapping Primary Color");
+      //Serial.println("Swapping Primary Color");
       if(currentState->temp.stepIndex == 1){
-        Serial.println("Using standard colors");
+        //Serial.println("Using standard colors");
         currentState->temp.stepIndex = 0;
       }else{
-        Serial.println("Using alternate colors");
+       // Serial.println("Using alternate colors");
         currentState->temp.stepIndex = 1;
       } 
     }
   }
 
   if(currentState->temp.stepIndex == 1 && alternate == true){
-    Serial.println("Using alternate colors");
+    //Serial.println("Using alternate colors");
     primaryColor = currentState->constant.strips[0]->Color(command.secondaryRed, command.secondaryGreen, command.secondaryBlue);
     secondaryColor = currentState->constant.strips[0]->Color(command.primaryRed, command.primaryGreen, command.primaryBlue);
   }else{
-    Serial.println("Using standard colors");
+    //Serial.println("Using standard colors");
     primaryColor = currentState->constant.strips[0]->Color(command.primaryRed, command.primaryGreen, command.primaryBlue);
     secondaryColor = currentState->constant.strips[0]->Color(command.secondaryRed, command.secondaryGreen, command.secondaryBlue);
   }
   
   if( currentState->temp.lastRowUsed == 0 && currentState->temp.lastPosUsed == 0){ //reset to last led in last row
     fillStrips(currentState, primaryColor);
-    Serial.println("Getting last row and channel");
+    //Serial.println("Getting last row and channel");
     currentState->temp.lastRowUsed = getLastRow(currentState);
     currentState->temp.lastPosUsed = getLongestChannelInRow(currentState, currentState->temp.lastRowUsed);
   }else{
     if(currentState->temp.lastPosUsed == 0){
-      Serial.print("Row ");
-      Serial.print(currentState->temp.lastRowUsed);
-      Serial.println(" complete, getting next row");
+      //Serial.print("Row ");
+      //Serial.print(currentState->temp.lastRowUsed);
+      //Serial.println(" complete, getting next row");
       
       for(int i=currentState->temp.lastRowUsed-1; i>= 0; i--){
         int nextChannel = getLongestChannelInRow(currentState, i);
         if(nextChannel > 0){
           currentState->temp.lastRowUsed = i;
           currentState->temp.lastPosUsed = nextChannel;
-          Serial.print("Next row is ");
-          Serial.println(currentState->temp.lastRowUsed);
+          //Serial.print("Next row is ");
+          //Serial.println(currentState->temp.lastRowUsed);
           break;
         }
       }
     }else{
-      Serial.println("Decrementing LED used");
+      //Serial.println("Decrementing LED used");
       currentState->temp.lastPosUsed--;
     }
   }
   
-  Serial.print("Stacking Row ");
-  Serial.println(currentState->temp.lastRowUsed);
-  Serial.print("Stacking LED ");
-  Serial.println(currentState->temp.lastPosUsed);
+  //Serial.print("Stacking Row ");
+  //Serial.println(currentState->temp.lastRowUsed);
+  //Serial.print("Stacking LED ");
+  //Serial.println(currentState->temp.lastPosUsed);
   
   for(int row=0; row<NUM_ROWS; row++){
     if(row > currentState->temp.lastRowUsed){
@@ -344,6 +344,11 @@ void runCommand(state* currentState) {
   /*if(currentState->temp.brakeLight == true || currentState->temp.leftTurnLight == true || currentState->temp.rightTurnLight == true){//handle signals
     signalCommand(currentState);
   }else{*/
+  if(getInteriorLightState(currentState) == true){
+    Serial.println("Interior Lights On");
+  }else{
+    Serial.println("Interior Lights Off");
+  }
     switch(command.animation){
       case 0:
         staticCommand(currentState, false);

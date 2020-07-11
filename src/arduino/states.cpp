@@ -24,9 +24,17 @@ state* getCurrentState(){
 
 bool getInteriorSwitchState() {
   if(digitalRead(interiorTogglePin) == LOW){
+    return false;//DISABLED
+  }else{
+    return false;
+  }
+}
+
+bool getInteriorLightState(state* currentState){
+  if(getInteriorSwitchState() == true || currentState->temp.interiorOn == true){
     return true;
   }else{
-    return true;//ALWAYS ON
+    return false;
   }
 }
 
@@ -64,7 +72,7 @@ bool getBrakeSwitchState() {
 }
 
 void mapPositions(dynamicState *dState){
-  Serial.println("Start mapping positions");
+  //Serial.println("Start mapping positions");
   memset (dState->mappedPositions, 0, sizeof(dState->mappedPositions));
   for(int i=0; i<NUM_ROWS; i++){
     for(int j=0; j<NUM_COLS; j++){
@@ -75,12 +83,12 @@ void mapPositions(dynamicState *dState){
         if(dState->channels[l].stripPosition == value){
           dState->mappedPositions[i][j][k] = l+1;//increment all strips id by 1 so we don't lose track of the 0 strip
           k++; //used to keep track of multiple strips in the same positions
-          Serial.print("Strip ");
-          Serial.print(l);
-          Serial.print(" is in row ");
-          Serial.print(i);
-          Serial.print(" and column ");
-          Serial.println(j);
+          //Serial.print("Strip ");
+          //Serial.print(l);
+          //Serial.print(" is in row ");
+          //Serial.print(i);
+          //Serial.print(" and column ");
+          //Serial.println(j);
         }
       }
     }
@@ -106,13 +114,13 @@ int getLongestChannelInLocation(state* currentState, int rowIndex, int colIndex)
         highestLEDCount = numUseablePositions;
     }
   }
-  Serial.print("Longest channel for location Row: ");
-  Serial.print(rowIndex);
-  Serial.print(" Col: ");
-  Serial.print(colIndex);
-  Serial.print(" has ");
-  Serial.print(highestLEDCount);
-  Serial.println(" leds");
+  //Serial.print("Longest channel for location Row: ");
+  //Serial.print(rowIndex);
+  //Serial.print(" Col: ");
+  //Serial.print(colIndex);
+  //Serial.print(" has ");
+  //Serial.print(highestLEDCount);
+  //Serial.println(" leds");
   return highestLEDCount;
 }
 
@@ -127,11 +135,11 @@ int getLongestChannelInRow(state* currentState, int rowIndex){
       }
     }
   }
-  Serial.print("Longest channel for row ");
-  Serial.print(rowIndex);
-  Serial.print(" has ");
-  Serial.print(highestLEDCount);
-  Serial.println(" leds");
+  //Serial.print("Longest channel for row ");
+  //Serial.print(rowIndex);
+  //Serial.print(" has ");
+  //Serial.print(highestLEDCount);
+  //Serial.println(" leds");
   return highestLEDCount;
 }
 
@@ -193,7 +201,7 @@ void setInitialChannelState(dynamicState *dState) {
   dState->channels[3].width = 18;
 
   dState->channels[4].isCentered = false;//Left Rear Rock Light
-  dState->channels[4].isInterior = true;
+  dState->channels[4].isInterior = false;
   dState->channels[4].stripUsed = true;
   dState->channels[4].directionFlipped = true;
   dState->channels[4].stripType = 1;
@@ -268,7 +276,7 @@ void setInitialCommandState(dynamicState *dState){
   dState->command.secondaryGreen = 0;
   dState->command.secondaryBlue = 255;
   dState->command.animation = 8;// Stack Alternate: 8
-  dState->command.stepDelay = 10;
+  dState->command.stepDelay = 100;
 }
 
 bool updateBrakeState(state* currentState){
@@ -323,7 +331,7 @@ bool updateSignals(state* currentState){
 
 bool updateTempState(state *currentState){
   bool previousInteriorOnState = currentState->temp.interiorOn;
-  currentState->temp.interiorOn = getInteriorSwitchState();
+  currentState->temp.interiorOn = getInteriorLightState(currentState);
   
   bool previousAlternateCommandState = currentState->temp.alternateCommand;
   currentState->temp.alternateCommand = getAlternateCommandSwitchState();
