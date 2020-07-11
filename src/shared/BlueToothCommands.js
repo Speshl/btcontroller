@@ -4,6 +4,16 @@ export default class BlueToothCommands {
     static encoder = new TextEncoder();
     static decoder = new TextDecoder('utf-8');
 
+    static runPromiseWithTimeout = async(functionToRun, timeout) => {
+        let timerPromise = new Promise((resolve, reject) => {
+            let wait = setTimeout(() => {
+              reject('TimedOut');
+            }, timeout)
+          })
+
+        return Promise.race([functionToRun, timerPromise])
+    }
+
     static connect = async (disconnectListener) => {
         let uuidArray = serviceUUIDs.channelUUIDs;
         uuidArray.push(serviceUUIDs.saveUUID);
@@ -20,7 +30,7 @@ export default class BlueToothCommands {
         try{
             let device = await navigator.bluetooth.requestDevice(options);
             device.addEventListener('gattserverdisconnected', disconnectListener);
-            let server = await device.gatt.connect();
+            let server = await this.runPromiseWithTimeout(device.gatt.connect(),5000);
             return server;
         }catch(e){
             throw new Error("Bluetooth Connection: "+e);
@@ -45,26 +55,31 @@ export default class BlueToothCommands {
         if(!server.connected){
             server = await server.connect();
         }
-        let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
-        let char = await service.getCharacteristic(serviceUUIDs.bulkReadUUID);
-        let data = await char.readValue();
+        try{
 
-        let lightsOn = (data.getUint8(0) === 1) ? true : false;
-        let interiorLightsOn = (data.getUint8(1) === 1) ? true : false;
-        let command = this.readCommandData(data.buffer.slice(2,12))
+            let service = await await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),5000);
+            let char = await await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.bulkReadUUID),5000)
+            let data = await await this.runPromiseWithTimeout(char.readValue(),5000);
 
-        let channelsData = [];
-        for(let i=0; i< 8; i++){
-            let startIndex = 12+(14*i);
-            let endIndex = startIndex + 14;
-            channelsData.push(this.readChannelData(data.buffer.slice(startIndex, endIndex)));
-        }
-        
-        return {
-            lightsOn: lightsOn,
-            interiorLightsOn: interiorLightsOn,
-            command: command,
-            channels: channelsData
+            let lightsOn = (data.getUint8(0) === 1) ? true : false;
+            let interiorLightsOn = (data.getUint8(1) === 1) ? true : false;
+            let command = this.readCommandData(data.buffer.slice(2,12))
+
+            let channelsData = [];
+            for(let i=0; i< 8; i++){
+                let startIndex = 12+(14*i);
+                let endIndex = startIndex + 14;
+                channelsData.push(this.readChannelData(data.buffer.slice(startIndex, endIndex)));
+            }
+            
+            return {
+                lightsOn: lightsOn,
+                interiorLightsOn: interiorLightsOn,
+                command: command,
+                channels: channelsData
+            }
+        }catch(error){
+            throw new Error("Bluetooth Bulk Load: "+error);
         }
     }
 
