@@ -352,7 +352,15 @@ export class ChannelSelector extends Component {
 
     getInteriorCheckedState = () => {
         if(this.props.state.channelState.editedChannelDescription !== null){
-            return (this.props.state.channelState.editedChannelDescription.isInterior === true) ? true : false
+            let id = this.props.state.channelState.editedChannelDescription.id;
+            let interiorValue = this.props.state.channelState.editedChannelDescription.isInterior;
+            if(interiorValue != null) {
+                return interiorValue
+            }else if(this.props.state.channelState.channelDescriptions !== null){
+                return this.props.state.channelState.channelDescriptions[id].isInterior
+            }else{
+                return false;
+            }
         }else{
             return false;
         }
@@ -360,7 +368,15 @@ export class ChannelSelector extends Component {
 
     getCenteredCheckedState = () => {
         if(this.props.state.channelState.editedChannelDescription !== null){
-            return (this.props.state.channelState.editedChannelDescription.isCentered === true) ? true : false
+            let id = this.props.state.channelState.editedChannelDescription.id;
+            let interiorValue = this.props.state.channelState.editedChannelDescription.isCentered;
+            if(interiorValue != null) {
+                return interiorValue
+            }else if(this.props.state.channelState.channelDescriptions !== null){
+                return this.props.state.channelState.channelDescriptions[id].isCentered
+            }else{
+                return false;
+            }
         }else{
             return false;
         }

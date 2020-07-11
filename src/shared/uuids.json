@@ -2,6 +2,7 @@
     "serviceUUID": "8d727090-093e-46a8-bf1d-23eeee2da202",
     "saveUUID": "8d727091-093e-46a8-bf1d-23eeee2da202",
     "onUUID": "8d727092-093e-46a8-bf1d-23eeee2da202",
+    "interiorOnUUID": "8d72709d-093e-46a8-bf1d-23eeee2da202",
     "commandUUID": "8d727093-093e-46a8-bf1d-23eeee2da202",
     "bulkReadUUID": "8d727094-093e-46a8-bf1d-23eeee2da202",
     "channelUUIDs": [

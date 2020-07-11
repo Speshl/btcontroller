@@ -50,17 +50,19 @@ export default class BlueToothCommands {
         let data = await char.readValue();
 
         let lightsOn = (data.getUint8(0) === 1) ? true : false;
+        let interiorLightsOn = (data.getUint8(1) === 1) ? true : false;
         let command = this.readCommandData(data.buffer.slice(2,12))
 
         let channelsData = [];
         for(let i=0; i< 8; i++){
-            let startIndex = 12+(12*i);
-            let endIndex = startIndex + 12;
+            let startIndex = 12+(14*i);
+            let endIndex = startIndex + 14;
             channelsData.push(this.readChannelData(data.buffer.slice(startIndex, endIndex)));
         }
         
         return {
             lightsOn: lightsOn,
+            interiorLightsOn: interiorLightsOn,
             command: command,
             channels: channelsData
         }
@@ -143,12 +145,13 @@ export default class BlueToothCommands {
             isCentered: uInt8Viewer[0],
             isInterior: uInt8Viewer[1],
             stripUsed: uInt8Viewer[2],
-            stripType: uInt8Viewer[3],
-            stripOrder: uInt8Viewer[4],
-            stripPosition: uInt8Viewer[5],
-            numLEDs: uInt16Viewer[3], //TODO: Verify if this is correct
-            height: uInt16Viewer[4],
-            width: uInt16Viewer[5]
+            directionFlipped: uInt8Viewer[3],
+            stripType: uInt8Viewer[4],
+            stripOrder: uInt8Viewer[5],
+            stripPosition: uInt8Viewer[6],
+            numLEDs: uInt16Viewer[4], //TODO: Verify if this is correct
+            height: uInt16Viewer[5],
+            width: uInt16Viewer[6]
         }
     }
 
@@ -163,6 +166,7 @@ export default class BlueToothCommands {
                 isCentered: 0,
                 isInterior: 0,
                 stripUsed: 0,
+                directionFlipped: 0,
                 stripType: 0,
                 stripOrder: 0,
                 stripPosition: 0,
@@ -271,6 +275,22 @@ export default class BlueToothCommands {
             return true;
         }catch(error){
             console.log("Error sending toggleLights command: "+error);
+            return false;
+        }
+    }
+
+    static toggleInteriorLights = async (server, status) => {
+        try{
+            if(!server.connected){
+                server = await server.connect();
+            }
+            let value = (status) ? new Uint8Array([0]) : new Uint8Array([1])
+            let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
+            let characteristic = await service.getCharacteristic(serviceUUIDs.interiorOnUUID);
+            characteristic.writeValue(value);
+            return true;
+        }catch(error){
+            console.log("Error sending toggleInteriorLights command: "+error);
             return false;
         }
     }

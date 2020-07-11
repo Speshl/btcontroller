@@ -40,13 +40,31 @@ class DeviceSelector extends Component {
   }
 
   toggleLightStatus = async () => {
+    console.log("toggling lights")
     if(this.props.state.deviceState.connectionStatus === 2){
         let status = await BlueToothCommands.toggleLights(this.props.state.deviceState.selectedDevice, this.props.state.deviceState.lightsOn);
         if(status){//success
           this.props.stateUpdaters.updateDeviceState(
             this.props.state.deviceState.selectedDevice,
             this.props.state.deviceState.connectionStatus,
-            !this.props.state.deviceState.lightsOn
+            !this.props.state.deviceState.lightsOn,
+            this.props.state.deviceState.interiorLightsOn
+          );
+        }
+    }
+  }
+
+  toggleInteriorLightStatus = async () => {
+    console.log("Toggling interior lights")
+    if(this.props.state.deviceState.connectionStatus === 2){
+      console.log(this.props.state.deviceState.interiorLightsOn)
+        let status = await BlueToothCommands.toggleInteriorLights(this.props.state.deviceState.selectedDevice, this.props.state.deviceState.interiorLightsOn);
+        if(status){//success
+          this.props.stateUpdaters.updateDeviceState(
+            this.props.state.deviceState.selectedDevice,
+            this.props.state.deviceState.connectionStatus,
+            this.props.state.deviceState.lightsOn,
+            !this.props.state.deviceState.interiorLightsOn
           );
         }
     }
@@ -96,7 +114,20 @@ class DeviceSelector extends Component {
     return status;
   }
 
+  getInteriorLightsToggleButton = () => {
+    console.log("Interior Toggle Button")
+    if(this.props.state.deviceState.connectionStatus === 2){
+      console.log(this.props.state.deviceState.interiorLightsOn)
+      if(this.props.state.deviceState.interiorLightsOn){
+        return <div><button className="lightsToggle" onClick={this.toggleInteriorLightStatus}>Toggle Interior Lights Off</button></div>
+      }else{
+        return <div><button className="lightsToggle" onClick={this.toggleInteriorLightStatus}>Toggle Interior Lights On</button></div>
+      }
+    }
+  }
+
   getLightsToggleButton = () => {
+    console.log("Lights Toggle Button")
     if(this.props.state.deviceState.connectionStatus === 2){
       if(this.props.state.deviceState.lightsOn){
         return <div><button className="lightsToggle" onClick={this.toggleLightStatus}>Toggle Lights Off</button></div>
@@ -131,6 +162,7 @@ class DeviceSelector extends Component {
             {this.getSaveButton()}
           </div>
           {this.getLightsToggleButton()}
+          {this.getInteriorLightsToggleButton()}
         </div>
       </div>
     );

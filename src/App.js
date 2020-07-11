@@ -10,7 +10,8 @@ class App extends React.Component {
     deviceState: {
       selectedDevice: null,
       connectionStatus: 0, //0 is disconnected, 1 is connecting, 2 is connected
-      lightsOn: true
+      lightsOn: true,
+      interiorLightsOn: true
     },
     channelState: {
       selectedChannelList: [false, false, false, false, false, false, false, false],
@@ -37,11 +38,12 @@ class App extends React.Component {
     }
   }
 
-  updateDeviceState = (selectedDevice, connectionStatus, lightsOn) =>{
+  updateDeviceState = (selectedDevice, connectionStatus, lightsOn, interiorLightsOn) =>{
     let state = {
       selectedDevice: selectedDevice,
       connectionStatus: connectionStatus,
-      lightsOn: lightsOn
+      lightsOn: lightsOn,
+      interiorLightsOn: interiorLightsOn
     }
     this.setState({deviceState: state});
   }
@@ -90,7 +92,8 @@ class App extends React.Component {
       let deviceState = {
         selectedDevice: updates.server,
         connectionStatus: 2, //connected
-        lightsOn: updates.data.lightsOn
+        lightsOn: updates.data.lightsOn,
+        interiorLightsOn: updates.data.interiorLightsOn
       }
 
       let primaryColorState = {
