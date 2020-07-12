@@ -27,12 +27,14 @@ export default class BlueToothCommands {
                 {services: [serviceUUIDs.serviceUUID]}
             ]*/
         };
+        let server;
         try{
             let device = await navigator.bluetooth.requestDevice(options);
             device.addEventListener('gattserverdisconnected', disconnectListener);
-            let server = await this.runPromiseWithTimeout(device.gatt.connect(),5000);
+            server = await this.runPromiseWithTimeout(device.gatt.connect(),10000);
             return server;
         }catch(e){
+            this.disconnect(server);
             throw new Error("Bluetooth Connection: "+e);
         }
     }
@@ -52,14 +54,14 @@ export default class BlueToothCommands {
     }
 
     static bulkLoad = async (server) => {
-        if(!server.connected){
-            server = await server.connect();
-        }
         try{
+            if(!server.connected){
+                server = await this.runPromiseWithTimeout(server.connect(),10000);
+            }
 
-            let service = await await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),5000);
-            let char = await await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.bulkReadUUID),5000)
-            let data = await await this.runPromiseWithTimeout(char.readValue(),5000);
+            let service = await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),10000);
+            let char = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.bulkReadUUID),10000);
+            let data = await this.runPromiseWithTimeout(char.readValue(),10000);
 
             let lightsOn = (data.getUint8(0) === 1) ? true : false;
             let interiorLightsOn = (data.getUint8(1) === 1) ? true : false;
@@ -79,42 +81,57 @@ export default class BlueToothCommands {
                 channels: channelsData
             }
         }catch(error){
+            this.disconnect(server);
             throw new Error("Bluetooth Bulk Load: "+error);
         }
     }
 
     static load = async (server) => {
-        if(!server.connected){
-            server = await server.connect();
+        try{
+            if(!server.connected){
+                server = await this.runPromiseWithTimeout(server.connect(),10000);
+            }
+            let service = await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),10000);
+            let data = await Promise.all([
+                this.loadLightsOnData(service),
+                this.loadCommandData(service),
+                this.loadChannelData(service, 0),
+                this.loadChannelData(service, 1),
+                this.loadChannelData(service, 2),
+                this.loadChannelData(service, 3),
+                this.loadChannelData(service, 4),
+                this.loadChannelData(service, 5),
+                this.loadChannelData(service, 6),
+                this.loadChannelData(service, 7)
+            ]);
+            return {
+                lightsOn: data[0],
+                command: data[1],
+                channels: data.slice(2)
+            }
+        }catch(error){
+            this.disconnect(server);
+            throw new Error ("Bluetooth Load: "+error);
         }
-        let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
-        let data = await Promise.all([
-            this.loadLightsOnData(service),
-            this.loadCommandData(service),
-            this.loadChannelData(service, 0),
-            this.loadChannelData(service, 1),
-            this.loadChannelData(service, 2),
-            this.loadChannelData(service, 3),
-            this.loadChannelData(service, 4),
-            this.loadChannelData(service, 5),
-            this.loadChannelData(service, 6),
-            this.loadChannelData(service, 7)
-        ]);
-        return {
-            lightsOn: data[0],
-            command: data[1],
-            channels: data.slice(2)
+    }
+
+    static loadInteriorLightsOnData = async (service) => {
+        try{
+            let char = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.interiorOnUUID),10000);
+            let value = await this.runPromiseWithTimeout(char.readValue(),10000);
+            return (value.getUint8(0) === 1) ? true : false;
+        }catch(error){
+            throw new Error ("Bluetooth Load Interior Light: "+error);
         }
     }
 
     static loadLightsOnData = async (service) => {
         try{
-            let char = await service.getCharacteristic(serviceUUIDs.onUUID);
-            let value = await char.readValue();
+            let char = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.onUUID),10000);
+            let value = await this.runPromiseWithTimeout(char.readValue(),10000);
             return (value.getUint8(0) === 1) ? true : false;
         }catch(error){
-            console.log(error);
-            return true;
+            throw new Error ("Bluetooth Load Light: "+error);
         }
     }
 
@@ -135,21 +152,11 @@ export default class BlueToothCommands {
 
     static loadCommandData = async (service) => {
         try{
-            let char = await service.getCharacteristic(serviceUUIDs.commandUUID);
-            let value = await char.readValue();
+            let char = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.commandUUID),10000);
+            let value = await this.runPromiseWithTimeout(char.readValue(),10000);
             return this.readCommandData(value);
         }catch(error){
-            console.log("Error reading commandData: "+error);
-            return{
-                primaryRed: 0,
-                primaryGreen: 0,
-                primaryBlue: 0,
-                secondaryRed: 0,
-                secondaryGreen: 0,
-                secondaryBlue: 0,
-                animation: 0,
-                stepDelay: 0
-            }
+            throw new Error ("Bluetooth Load Command: "+error);
         }
     }
 
@@ -172,33 +179,21 @@ export default class BlueToothCommands {
 
     static loadChannelData = async (service, channelIndex) => {
         try{
-            let char = await service.getCharacteristic(serviceUUIDs.channelUUIDs[channelIndex]);
-            let value = await char.readValue();
+            let char = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.channelUUIDs[channelIndex]),10000);
+            let value = await this.runPromiseWithTimeout(char.readValue(),10000);
             return this.readChannelData(value);
         }catch(error){
-            console.log("Error reading channel "+channelIndex+" data: "+error);
-            return {
-                isCentered: 0,
-                isInterior: 0,
-                stripUsed: 0,
-                directionFlipped: 0,
-                stripType: 0,
-                stripOrder: 0,
-                stripPosition: 0,
-                numLEDs: 0,
-                height: 0,
-                width: 0
-            }
+            throw new Error ("Bluetooth Load Channel: "+error);
         }
     }
 
     static updateCommand = async (server, primaryColor, secondaryColor, command) => {
         try{
             if(!server.connected){
-                server = await server.connect();
+                server = await this.runPromiseWithTimeout(server.connect(),10000);
             }
-            let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
-            let char = await service.getCharacteristic(serviceUUIDs.commandUUID);
+            let service = await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),10000);
+            let char = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.commandUUID),10000);
     
             let buffer = new ArrayBuffer(2); //underlying buffer for both views
             let buffer16bit = new Uint16Array(buffer);
@@ -220,18 +215,18 @@ export default class BlueToothCommands {
             char.writeValue(data);
             return true;
         }catch(error){
-            console.log("Error sending updateCommand ... command: "+error);
-            return false;
+            this.disconnect(server);
+            throw new Error ("Bluetooth Update Command: "+error);
         }
     }
 
     static updateChannel = async (server, channelIndex, stripType, numLEDs, position, order, used, isInterior, isCentered, height, width) => {
         try{
             if(!server.connected){
-                server = await server.connect();
+                server = await this.runPromiseWithTimeout(server.connect(),10000);
             }
-            let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
-            let char = await service.getCharacteristic(serviceUUIDs.channelUUIDs[channelIndex]);
+            let service = await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),10000);
+            let char = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.channelUUIDs[channelIndex]),10000);
     
             let buffer = new ArrayBuffer(6); //underlying buffer for both views
             let buffer16bit = new Uint16Array(buffer);
@@ -257,56 +252,56 @@ export default class BlueToothCommands {
             char.writeValue(data);
             return true;
         }catch(error){
-            console.log("Error sending updateChannel command: "+error);
-            return false;
+            this.disconnect(server);
+            throw new Error ("Bluetooth Update Channel: "+error);
         }
     }
 
     static save = async (server) => {
         try{
             if(!server.connected){
-                server = await server.connect();
+                server = await this.runPromiseWithTimeout(server.connect(),10000);
             }
-            let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
-            let characteristic = await service.getCharacteristic(serviceUUIDs.saveUUID);
+            let service = await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),10000);
+            let characteristic = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.saveUUID),10000);
             let value = new Uint8Array([1]);//false is [0]
             characteristic.writeValue(value);
             return true;
         }catch(error){
-            console.log("Error sending save command: "+error);
-            return false;
+            this.disconnect(server);
+            throw new Error ("Bluetooth Save: "+error);
         }
     }
 
     static toggleLights = async (server, status) => {
         try{
             if(!server.connected){
-                server = await server.connect();
+                server = await this.runPromiseWithTimeout(server.connect(),10000);
             }
             let value = (status) ? new Uint8Array([0]) : new Uint8Array([1])
-            let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
-            let characteristic = await service.getCharacteristic(serviceUUIDs.onUUID);
+            let service = await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),10000);
+            let characteristic = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.onUUID),10000);
             characteristic.writeValue(value);
             return true;
         }catch(error){
-            console.log("Error sending toggleLights command: "+error);
-            return false;
+            this.disconnect(server);
+            throw new Error ("Bluetooth Update Lights: "+error);
         }
     }
 
     static toggleInteriorLights = async (server, status) => {
         try{
             if(!server.connected){
-                server = await server.connect();
+                server = await this.runPromiseWithTimeout(server.connect(),10000);
             }
             let value = (status) ? new Uint8Array([0]) : new Uint8Array([1])
-            let service = await server.getPrimaryService(serviceUUIDs.serviceUUID);
-            let characteristic = await service.getCharacteristic(serviceUUIDs.interiorOnUUID);
+            let service = await this.runPromiseWithTimeout(server.getPrimaryService(serviceUUIDs.serviceUUID),10000);
+            let characteristic = await this.runPromiseWithTimeout(service.getCharacteristic(serviceUUIDs.interiorOnUUID),10000);
             characteristic.writeValue(value);
             return true;
         }catch(error){
-            console.log("Error sending toggleInteriorLights command: "+error);
-            return false;
+            this.disconnect(server);
+            throw new Error ("Bluetooth Update InteriorLights: "+error);
         }
     }
 }

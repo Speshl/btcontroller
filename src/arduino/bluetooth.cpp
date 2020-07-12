@@ -45,7 +45,14 @@ bool delayAndPoll(state* currentState, int sleep){
   unsigned long targetTime = currentTime + ulSleep;
   while(targetTime > millis()){
     BLE.poll();
-    
+    /*if(BLE.connected()){
+      Serial.println("Central is connected");
+      BLEDevice central = BLE.central();
+      if(central){
+        Serial.print("Connected to central: ");
+        Serial.println(central.address());
+      }
+    }*/
     bool previousSignalState = currentState->temp.lightsSaved; //this is true when a signal is on
     bool currentSignalState = updateSignals(currentState); //updates signals and returns bool for if a signal is on
     if(previousSignalState != currentSignalState){

@@ -16,7 +16,7 @@ export class DisplayBuilder extends Component {
                 this.props.state.commandState
             );
         }catch(err){
-            console.log(err);
+            alert(err);
         }
     }
 

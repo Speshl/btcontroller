@@ -40,12 +40,17 @@ class DeviceSelector extends Component {
 
   save = async () => {
     if(this.props.state.deviceState.selectedDevice){
-      BlueToothCommands.save(this.props.state.deviceState.selectedDevice);
+      try{
+        BlueToothCommands.save(this.props.state.deviceState.selectedDevice);
+      }catch(e){
+        alert(e);
+      }
     }
   }
 
   toggleLightStatus = async () => {
     if(this.props.state.deviceState.connectionStatus === 2){
+      try{
         let status = await BlueToothCommands.toggleLights(this.props.state.deviceState.selectedDevice, this.props.state.deviceState.lightsOn);
         if(status){//success
           this.props.stateUpdaters.updateDeviceState(
@@ -55,12 +60,15 @@ class DeviceSelector extends Component {
             this.props.state.deviceState.interiorLightsOn
           );
         }
+      }catch(e){
+        alert(e);
+      }
     }
   }
 
   toggleInteriorLightStatus = async () => {
     if(this.props.state.deviceState.connectionStatus === 2){
-      console.log(this.props.state.deviceState.interiorLightsOn)
+      try{
         let status = await BlueToothCommands.toggleInteriorLights(this.props.state.deviceState.selectedDevice, this.props.state.deviceState.interiorLightsOn);
         if(status){//success
           this.props.stateUpdaters.updateDeviceState(
@@ -70,6 +78,9 @@ class DeviceSelector extends Component {
             !this.props.state.deviceState.interiorLightsOn
           );
         }
+      }catch(e){
+        alert(e);
+      }
     }
   }
 

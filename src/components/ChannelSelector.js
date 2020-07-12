@@ -16,43 +16,48 @@ export class ChannelSelector extends Component {
             let isCentered = (this.props.state.channelState.editedChannelDescription.isCentered !== null) ? this.props.state.channelState.editedChannelDescription.isCentered : this.props.state.channelState.channelDescriptions[id].isCentered
             let height = (this.props.state.channelState.editedChannelDescription.height !== null) ? this.props.state.channelState.editedChannelDescription.height : this.props.state.channelState.channelDescriptions[id].height
             let width = (this.props.state.channelState.editedChannelDescription.width !== null) ? this.props.state.channelState.editedChannelDescription.width : this.props.state.channelState.channelDescriptions[id].width;
-            let status = await BlueToothCommands.updateChannel(
-                this.props.state.deviceState.selectedDevice,
-                id,
-                type,
-                numLEDs,
-                this.getIntFromPosition(position),
-                order,
-                used,
-                isInterior,
-                isCentered,
-                height,
-                width
-            );
 
-            if(status){
-                let channelDescriptions = this.props.state.channelState.channelDescriptions;
-                channelDescriptions[id].numLEDs = numLEDs;
-                channelDescriptions[id].type = type;
-                channelDescriptions[id].order = order;
-                channelDescriptions[id].position = position;
-                channelDescriptions[id].isInterior = isInterior;
-                channelDescriptions[id].isCentered = isCentered;
-                this.props.stateUpdaters.updateChannelState(
-                    this.props.state.channelState.selectedChannelList,
-                    channelDescriptions,
-                    {   
-                        id: id,
-                        type: null,
-                        numLEDs: null,
-                        position: null,
-                        order: null,
-                        isInterior: null,
-                        isCentered: null,
-                        height: null,
-                        width: null
-                    }
+            try{
+                let status = await BlueToothCommands.updateChannel(
+                    this.props.state.deviceState.selectedDevice,
+                    id,
+                    type,
+                    numLEDs,
+                    this.getIntFromPosition(position),
+                    order,
+                    used,
+                    isInterior,
+                    isCentered,
+                    height,
+                    width
                 );
+    
+                if(status){
+                    let channelDescriptions = this.props.state.channelState.channelDescriptions;
+                    channelDescriptions[id].numLEDs = numLEDs;
+                    channelDescriptions[id].type = type;
+                    channelDescriptions[id].order = order;
+                    channelDescriptions[id].position = position;
+                    channelDescriptions[id].isInterior = isInterior;
+                    channelDescriptions[id].isCentered = isCentered;
+                    this.props.stateUpdaters.updateChannelState(
+                        this.props.state.channelState.selectedChannelList,
+                        channelDescriptions,
+                        {   
+                            id: id,
+                            type: null,
+                            numLEDs: null,
+                            position: null,
+                            order: null,
+                            isInterior: null,
+                            isCentered: null,
+                            height: null,
+                            width: null
+                        }
+                    );
+                }
+            }catch(e){
+                alert(e);
             }
         }else{
             //there is nothing to update
