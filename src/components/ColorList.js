@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
-import { SketchPicker } from 'react-color';
+import { SketchPicker, ChromePicker } from 'react-color';
 import { CirclePicker } from 'react-color';
 import './../css/ColorList.css';
 
-var newColor = null;
+var newColor = "$FF00FF";
 
 class ColorList extends Component {
 
     handleNewColor = (color, e) => {
         newColor = color.hex.toUpperCase();
+        this.props.stateUpdaters.update();
     }
 
     addColor = (e) => {
@@ -16,19 +17,13 @@ class ColorList extends Component {
             let state = this.props.state.primaryColorState;
             this.props.stateUpdaters.updatePrimaryColorState(
                 state.colorList,
-                true,
-                state.red,
-                state.green,
-                state.blue
+                true
             );
         }else{
             let state = this.props.state.secondaryColorState;
             this.props.stateUpdaters.updateSecondaryColorState(
                 state.colorList,
-                true,
-                state.red,
-                state.green,
-                state.blue
+                true
             );
         }
     }
@@ -39,20 +34,14 @@ class ColorList extends Component {
             state.colorList.push(newColor);
             this.props.stateUpdaters.updatePrimaryColorState(
                 state.colorList,
-                state.isPickingColor,
-                state.red,
-                state.green,
-                state.blue
+                state.isPickingColor
             );
         }else{
             let state = this.props.state.secondaryColorState;
             state.colorList.push(newColor);
             this.props.stateUpdaters.updateSecondaryColorState(
                 state.colorList,
-                state.isPickingColor,
-                state.red,
-                state.green,
-                state.blue
+                state.isPickingColor
             );
         }
     }
@@ -62,42 +51,28 @@ class ColorList extends Component {
             let state = this.props.state.primaryColorState;
             this.props.stateUpdaters.updatePrimaryColorState(
                 state.colorList,
-                false,
-                state.red,
-                state.green,
-                state.blue
+                false
             );
         }else{
             let state = this.props.state.secondaryColorState;
             this.props.stateUpdaters.updateSecondaryColorState(
                 state.colorList,
-                false,
-                state.red,
-                state.green,
-                state.blue
+                false
             );
         }
     }
 
     handleSelectColor = (color, e) => {
         if(this.props.type === "primary"){
-            let state = this.props.state.primaryColorState;
-            this.props.stateUpdaters.updatePrimaryColorState(
-                state.colorList,
-                state.isPickingColor,
-                color.rgb.r,
-                color.rgb.g,
-                color.rgb.b
-            );
+            this.props.state.bluetoothHandler.animation.primaryRed = color.rgb.r;
+            this.props.state.bluetoothHandler.animation.primaryGreen = color.rgb.g;
+            this.props.state.bluetoothHandler.animation.primaryBlue = color.rgb.b;
+            this.props.stateUpdaters.update();
         }else{
-            let state = this.props.state.secondaryColorState;
-            this.props.stateUpdaters.updateSecondaryColorState(
-                state.colorList,
-                state.isPickingColor,
-                color.rgb.r,
-                color.rgb.g,
-                color.rgb.b
-            );
+            this.props.state.bluetoothHandler.animation.secondaryRed = color.rgb.r;
+            this.props.state.bluetoothHandler.animation.secondaryGreen = color.rgb.g;
+            this.props.state.bluetoothHandler.animation.secondaryBlue = color.rgb.b;
+            this.props.stateUpdaters.update();
         }
     }
 
@@ -123,7 +98,7 @@ class ColorList extends Component {
         if(colorState.isPickingColor){
             return (
                 <div>
-                    <SketchPicker presetColors={[]} disableAlpha={true} width="250px" onChangeComplete={this.handleNewColor}/>
+                    <SketchPicker presetColors={[]} disableAlpha={true} width="250px" onChangeComplete={this.handleNewColor} color={newColor}/>
                     <button onClick={this.addColorToList}>Add</button>
                     <button onClick={this.cancelColor}>Cancel</button>
                 </div>
@@ -138,35 +113,37 @@ class ColorList extends Component {
         let colorList = null;
         if(this.props.type === "primary"){
             selectedColor = this.getColorString(
-                this.props.state.primaryColorState.red,
-                this.props.state.primaryColorState.green,
-                this.props.state.primaryColorState.blue
+                this.props.state.bluetoothHandler.animation.primaryRed,
+                this.props.state.bluetoothHandler.animation.primaryGreen,
+                this.props.state.bluetoothHandler.animation.primaryBlue
             );
             colorList = this.props.state.primaryColorState.colorList;
             if(colorList.includes(selectedColor)){
                 return selectedColor;
             }else{
                 this.addColorToList({rgb:{
-                    r: this.props.state.primaryColorState.red,
-                    g: this.props.state.primaryColorState.green,
-                    b: this.props.state.primaryColorState.blue
+                    r: this.props.state.bluetoothHandler.animation.primaryRed,
+                    g: this.props.state.bluetoothHandler.animation.primaryGreen,
+                    b: this.props.state.bluetoothHandler.animation.primaryBlue
                 }});
+                return selectedColor;
             }
         }else{
             selectedColor = this.getColorString(
-                this.props.state.secondaryColorState.red,
-                this.props.state.secondaryColorState.green,
-                this.props.state.secondaryColorState.blue
+                this.props.state.bluetoothHandler.animation.secondaryRed,
+                this.props.state.bluetoothHandler.animation.secondaryGreen,
+                this.props.state.bluetoothHandler.animation.secondaryBlue
             );
             colorList = this.props.state.secondaryColorState.colorList;
             if(colorList.includes(selectedColor)){
                 return selectedColor;
             }else{
                 this.addColorToList({rgb:{
-                    r: this.props.state.secondaryColorState.red,
-                    g: this.props.state.secondaryColorState.green,
-                    b: this.props.state.secondaryColorState.blue
+                    r: this.props.bluetoothHandler.animation.secondaryRed,
+                    g: this.props.bluetoothHandler.animation.secondaryGreen,
+                    b: this.props.bluetoothHandler.animation.secondaryBlue
                 }});
+                return selectedColor;
             }
         }
     }

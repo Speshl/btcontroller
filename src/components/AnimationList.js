@@ -18,16 +18,18 @@ export class AnimationList extends Component {
     switchAnimation = (e) => {
         let index = animations.indexOf(e.target.value);
         if(index > -1){
-            this.props.stateUpdaters.updateCommandState(index, this.props.state.commandState.delay);
+            //this.props.stateUpdaters.updateCommandState(index, this.props.state.commandState.delay);
+            this.props.state.bluetoothHandler.animation.animation = index;
+            this.setState(this.props.state);
         }
     }
 
     getSelectedAnimation = () => {
-        return animations[this.props.state.commandState.animation];
+        return animations[this.props.state.bluetoothHandler.animation.animation];
     }
 
     getDelayValue = () => {
-        return this.props.state.commandState.delay;
+        return this.props.state.bluetoothHandler.animation.stepDelay;
     }
 
     updateDelayValue = (e) => {
@@ -35,7 +37,9 @@ export class AnimationList extends Component {
         if(isNaN(delay) || delay < 10){
             delay = 10;
         }
-        this.props.stateUpdaters.updateCommandState(this.props.state.commandState.animation, delay);
+        //this.props.stateUpdaters.updateCommandState(this.props.state.commandState.animation, delay);
+        this.props.state.bluetoothHandler.animation.stepDelay = delay;
+        this.setState(this.props.state);
     }
 
     render() {
