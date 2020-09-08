@@ -15,7 +15,7 @@ export default class Channel {
         this.numLEDs = 0;
         this.height = 0;
         this.width = 0;
-        this.channelSelected = false;
+        this.selected = false; //used for UI only
     }
 
     getPositionString(numCols){
@@ -85,7 +85,6 @@ export default class Channel {
             this.type,
             this.order,
             this.location,
-            0, //zero here so 16 bit are at right offset
             buffer8bit[0],
             buffer8bit[1],
             buffer8bit[2],

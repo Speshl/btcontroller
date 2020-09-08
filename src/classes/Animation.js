@@ -39,7 +39,6 @@ export default class Animation {
             this.secondaryGreen,
             this.secondaryBlue,
             this.animation,
-            0, //unknown 0 here for some reason???
             buffer8bit[0], //pull out as 2 8 bit values
             buffer8bit[1]
         ]);

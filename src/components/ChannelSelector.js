@@ -1,66 +1,13 @@
 import React, { Component } from 'react'
 import './../css/ChannelSelector.css';
-import BlueToothCommands from './../shared/BlueToothCommands';
+import Channel from './../classes/Channel';
 
 export class ChannelSelector extends Component {
-
     updateChannel = async (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null && this.props.state.channelState.channelDescriptions !== null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let numLEDs = (this.props.state.channelState.editedChannelDescription.numLEDs !== null) ? this.props.state.channelState.editedChannelDescription.numLEDs : this.props.state.channelState.channelDescriptions[id].numLEDs
-            let type = (this.props.state.channelState.editedChannelDescription.type !== null) ? this.props.state.channelState.editedChannelDescription.type : this.props.state.channelState.channelDescriptions[id].type
-            let order = (this.props.state.channelState.editedChannelDescription.order !== null) ? this.props.state.channelState.editedChannelDescription.order : this.props.state.channelState.channelDescriptions[id].order
-            let position = (this.props.state.channelState.editedChannelDescription.position !== null) ? this.props.state.channelState.editedChannelDescription.position : this.props.state.channelState.channelDescriptions[id].position
-            let used = this.props.state.channelState.selectedChannelList[id];
-            let isInterior = (this.props.state.channelState.editedChannelDescription.isInterior !== null) ? this.props.state.channelState.editedChannelDescription.isInterior : this.props.state.channelState.channelDescriptions[id].isInterior
-            let isCentered = (this.props.state.channelState.editedChannelDescription.isCentered !== null) ? this.props.state.channelState.editedChannelDescription.isCentered : this.props.state.channelState.channelDescriptions[id].isCentered
-            let height = (this.props.state.channelState.editedChannelDescription.height !== null) ? this.props.state.channelState.editedChannelDescription.height : this.props.state.channelState.channelDescriptions[id].height
-            let width = (this.props.state.channelState.editedChannelDescription.width !== null) ? this.props.state.channelState.editedChannelDescription.width : this.props.state.channelState.channelDescriptions[id].width;
-
-            try{
-                let status = await BlueToothCommands.updateChannel(
-                    this.props.state.deviceState.selectedDevice,
-                    id,
-                    type,
-                    numLEDs,
-                    this.getIntFromPosition(position),
-                    order,
-                    used,
-                    isInterior,
-                    isCentered,
-                    height,
-                    width
-                );
-    
-                if(status){
-                    let channelDescriptions = this.props.state.channelState.channelDescriptions;
-                    channelDescriptions[id].numLEDs = numLEDs;
-                    channelDescriptions[id].type = type;
-                    channelDescriptions[id].order = order;
-                    channelDescriptions[id].position = position;
-                    channelDescriptions[id].isInterior = isInterior;
-                    channelDescriptions[id].isCentered = isCentered;
-                    this.props.stateUpdaters.updateChannelState(
-                        this.props.state.channelState.selectedChannelList,
-                        channelDescriptions,
-                        {   
-                            id: id,
-                            type: null,
-                            numLEDs: null,
-                            position: null,
-                            order: null,
-                            isInterior: null,
-                            isCentered: null,
-                            height: null,
-                            width: null
-                        }
-                    );
-                }
-            }catch(e){
-                alert(e);
-            }
-        }else{
-            //there is nothing to update
+        if(this.props.state.editedChannel.id !== null){
+            let id = this.props.state.editedChannel.id;
+            this.props.state.bluetoothHandler.channels[id] = this.props.state.editedChannel;
+            this.props.stateUpdaters.update();
         }
     }
 
@@ -73,204 +20,146 @@ export class ChannelSelector extends Component {
     }
 
     channelClicked = (e) => {
-        let currentSelectedChannelList = this.props.state.channelState.selectedChannelList;
-        currentSelectedChannelList[e.target.value] = (currentSelectedChannelList[e.target.value] === true) ? false : true
-        this.props.stateUpdaters.updateChannelState(
-            currentSelectedChannelList,
-            this.props.state.channelState.channelDescriptions,
-            this.props.state.channelState.editedChannelDescription
-        );
-    }
-
-    getDisabledStatus = (channelNum) => {
-        if(this.props.state.channelState.channelDescriptions !== null){
-            if(this.props.state.channelState.channelDescriptions[channelNum].stripType === 0){
-                return true;
-            }else if(this.props.state.channelState.channelDescriptions[channelNum].stripType === null){
-                return true;
-            }else{
-                return false;
-            }
-        }
-        return true;
-    }
-
-    getToggleStyle = (channel) => {
-        let currentSelectedChannelList = this.props.state.channelState.selectedChannelList;
-        let channelFound = currentSelectedChannelList[channel];
-        if(channelFound){
-            return "channelButtonSelected"
-        }else{
-            return "channelButton"
-        }
+        let id = e.target.value;
+        this.props.state.bluetoothHandler.channels[id].selected = true;
+        this.props.stateUpdaters.update();
     }
 
     getTogglePositionStyle = (value) => {
-        if(this.props.state.channelState.editedChannelDescription != null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let position = this.props.state.channelState.editedChannelDescription.position;
-            if(position !== null){
-                if(value === position){
-                    return "channelPositionSelectedUsed";
-                }else{
-                    return "channelPosition";
-                }
-            }else if(this.props.state.channelState.channelDescriptions !== null
-                && value === this.props.state.channelState.channelDescriptions[id].position){
+        if(this.props.state.editedChannel.id !== null){
+            let location = this.props.state.editedChannel.location;
+            if(location !== null && location === value){
                 return "channelPositionSelectedUsed";
             }else{
                 return "channelPosition";
             }
-        }else{
-           return "channelPosition";
         }
     }
 
     switchEditingChannel = (e) => {
-        this.props.stateUpdaters.updateChannelState(
-            this.props.state.channelState.selectedChannelList,
-            this.props.state.channelState.channelDescriptions,
-            {
-                id: parseInt(e.target.value),
-                type: null,
-                numLEDs: null,
-                position: null,
-                order: null,
-                isInterior: null,
-                isCentered: null,
-                height: null,
-                width: null
-            }
-        );
+        this.props.state.editedChannel = this.props.state.bluetoothHandler.channels[e.target.value];
+        this.props.stateUpdaters.update();
     }
 
     updateChannelPosition = (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
-            editedChannelDescription.position = e.target.value;
-            this.props.stateUpdaters.updateChannelState(
-                this.props.state.channelState.selectedChannelList,
-                this.props.state.channelState.channelDescriptions,
-                editedChannelDescription
-            );
+        let value = (e.target.value === "") ? 0 : parseInt(e.target.value)
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.location = value;
+            this.props.stateUpdaters.update();
         }
     }
 
     updateStripType = (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
-            editedChannelDescription.type = parseInt(e.target.value);
-            this.props.stateUpdaters.updateChannelState(
-                this.props.state.channelState.selectedChannelList,
-                this.props.state.channelState.channelDescriptions,
-                editedChannelDescription
-            );
+        let value = (e.target.value === "") ? 0 : parseInt(e.target.value)
+        if(this.props.state.editedChannel.type !== null){
+            this.props.state.editedChannel.type = value;
+            this.props.stateUpdaters.update();
+        }
+    }
+
+    updateEnabled = (e) => {
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.enabled = e.target.checked;
+            this.props.stateUpdaters.update();
+        }
+    }
+
+    updateFlipped = (e) => {
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.directionFlipped = e.target.checked;
+            this.props.stateUpdaters.update();
+        }
+    }
+
+    updateLeftTurn = (e) => {
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.leftTurn = e.target.checked;
+            this.props.stateUpdaters.update();
+        }
+    }
+
+    updateRightTurn = (e) => {
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.rightTurn = e.target.checked;
+            this.props.stateUpdaters.update();
+        }
+    }
+
+    updateBrakeState = (e) => {
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.brake = e.target.checked;
+            this.props.stateUpdaters.update();
+        }
+    }
+
+    updateReverseState = (e) => {
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.reverse = e.target.checked;
+            this.props.stateUpdaters.update();
         }
     }
 
     updateInterior = (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
-            editedChannelDescription.isInterior = e.target.checked
-            this.props.stateUpdaters.updateChannelState(
-                this.props.state.channelState.selectedChannelList,
-                this.props.state.channelState.channelDescriptions,
-                editedChannelDescription
-            );
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.interior = e.target.checked;
+            this.props.stateUpdaters.update();
         }
     }
 
     updateCentered = (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
-            editedChannelDescription.isCentered = e.target.checked
-            this.props.stateUpdaters.updateChannelState(
-                this.props.state.channelState.selectedChannelList,
-                this.props.state.channelState.channelDescriptions,
-                editedChannelDescription
-            );
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.centered = e.target.checked;
+            this.props.stateUpdaters.update();
         }
     }
 
     updateNumLEDs = (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
-            editedChannelDescription.numLEDs = parseInt(e.target.value);
-            this.props.stateUpdaters.updateChannelState(
-                this.props.state.channelState.selectedChannelList,
-                this.props.state.channelState.channelDescriptions,
-                editedChannelDescription
-            );
+        let value = (e.target.value === "") ? 0 : parseInt(e.target.value)
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.numLEDs = value;
+            this.props.stateUpdaters.update();
         }
     }
 
     updateHeight = (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
-            editedChannelDescription.height = parseInt(e.target.value);
-            this.props.stateUpdaters.updateChannelState(
-                this.props.state.channelState.selectedChannelList,
-                this.props.state.channelState.channelDescriptions,
-                editedChannelDescription
-            );
+        let value = (e.target.value === "") ? 0 : parseInt(e.target.value)
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.height = value;
+            this.props.stateUpdaters.update();
         }
     }
 
     updateWidth = (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
-            editedChannelDescription.width = parseInt(e.target.value);
-            this.props.stateUpdaters.updateChannelState(
-                this.props.state.channelState.selectedChannelList,
-                this.props.state.channelState.channelDescriptions,
-                editedChannelDescription
-            );
+        let value = (e.target.value === "") ? 0 : parseInt(e.target.value)
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.width = value;
+            this.props.stateUpdaters.update();
         }
     }
 
     updateColorOrder = (e) => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let editedChannelDescription = this.props.state.channelState.editedChannelDescription;
-            editedChannelDescription.order = parseInt(e.target.value);
-            this.props.stateUpdaters.updateChannelState(
-                this.props.state.channelState.selectedChannelList,
-                this.props.state.channelState.channelDescriptions,
-                editedChannelDescription
-            );
+        let value = (e.target.value === "") ? 0 : parseInt(e.target.value)
+        if(this.props.state.editedChannel.id !== null){
+            this.props.state.editedChannel.order = value;
+            this.props.stateUpdaters.update();
         }
     }
 
     addEditChannels = () => {
-        let editedChannelDescription = null;
-        if(this.props.state.channelState.editedChannelDescription === null){
-            editedChannelDescription = {
-                id: 0,
-                type: null,
-                numLEDs: null,
-                position: null,
-                order: null,
-                isInterior: null,
-                isCentered: null,
-                height: null,
-                width: null
-            }
+        if(this.props.state.editedChannel.id === null){
+            this.props.state.editedChannel = this.props.state.bluetoothHandler.channels[0];
+        }else{
+            this.props.state.editedChannel = new Channel(null);
         }
-        this.props.stateUpdaters.updateChannelState(
-            this.props.state.channelState.selectedChannelList,
-            this.props.state.channelState.channelDescriptions,
-            editedChannelDescription
-        );
+        this.props.stateUpdaters.update();
     }
 
     getNumLEDsValue = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let numLEDs = this.props.state.channelState.editedChannelDescription.numLEDs;
+        if(this.props.state.editedChannel.id !== null){
+            
+            let numLEDs = this.props.state.editedChannel.numLEDs;
             if(numLEDs !== null){
                 return numLEDs
-            }else if(this.props.state.channelState.channelDescriptions !== null
-                && this.props.state.channelState.channelDescriptions[id].numLEDs !== null){
-                return this.props.state.channelState.channelDescriptions[id].numLEDs
             }else{
                 return 0;
             }
@@ -280,14 +169,10 @@ export class ChannelSelector extends Component {
     }
 
     getHeight = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let height = this.props.state.channelState.editedChannelDescription.height;
+        if(this.props.state.editedChannel.id !== null){
+            let height = this.props.state.editedChannel.height;
             if(height !== null){
                 return height
-            }else if(this.props.state.channelState.channelDescriptions !== null
-                && this.props.state.channelState.channelDescriptions[id].height !== null){
-                return this.props.state.channelState.channelDescriptions[id].height
             }else{
                 return 0;
             }
@@ -297,14 +182,10 @@ export class ChannelSelector extends Component {
     }
 
     getWidth = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let width = this.props.state.channelState.editedChannelDescription.width;
+        if(this.props.state.editedChannel.id !== null){    
+            let width = this.props.state.editedChannel.width;
             if(width !== null){
                 return width
-            }else if(this.props.state.channelState.channelDescriptions !== null
-                && this.props.state.channelState.channelDescriptions[id].width !== null){
-                return this.props.state.channelState.channelDescriptions[id].width
             }else{
                 return 0;
             }
@@ -314,22 +195,18 @@ export class ChannelSelector extends Component {
     }
 
     getSelectedChannel = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            return this.props.state.channelState.editedChannelDescription.id;
+        if(this.props.state.editedChannel.id !== null){
+            return this.props.state.editedChannel.id;
         }else{
             return 0;
         }
     }
-
+    
     getSelectedColorOrder = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let order = this.props.state.channelState.editedChannelDescription.order;
+        if(this.props.state.editedChannel.id !== null){
+            let order = this.props.state.editedChannel.order;
             if(order !== null){
                 return order
-            }else if(this.props.state.channelState.channelDescriptions !== null
-                && this.props.state.channelState.channelDescriptions[id].order !== null){
-                return this.props.state.channelState.channelDescriptions[id].order
             }else{
                 return 0;
             }
@@ -339,14 +216,10 @@ export class ChannelSelector extends Component {
     }
 
     getSelectedStripType = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let type = this.props.state.channelState.editedChannelDescription.type;
+        if(this.props.state.editedChannel.id !== null){
+            let type = this.props.state.editedChannel.type;
             if(type !== null){
                 return type
-            }else if(this.props.state.channelState.channelDescriptions !== null
-                && this.props.state.channelState.channelDescriptions[id].type !== null){
-                return this.props.state.channelState.channelDescriptions[id].type
             }else{
                 return 0;
             }
@@ -356,13 +229,10 @@ export class ChannelSelector extends Component {
     }
 
     getInteriorCheckedState = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let interiorValue = this.props.state.channelState.editedChannelDescription.isInterior;
-            if(interiorValue != null) {
-                return interiorValue
-            }else if(this.props.state.channelState.channelDescriptions !== null){
-                return this.props.state.channelState.channelDescriptions[id].isInterior
+        if(this.props.state.editedChannel.id !== null){
+            let value = this.props.state.editedChannel.interior;
+            if(value !== null){
+                return value
             }else{
                 return false;
             }
@@ -372,13 +242,88 @@ export class ChannelSelector extends Component {
     }
 
     getCenteredCheckedState = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
-            let id = this.props.state.channelState.editedChannelDescription.id;
-            let interiorValue = this.props.state.channelState.editedChannelDescription.isCentered;
-            if(interiorValue != null) {
-                return interiorValue
-            }else if(this.props.state.channelState.channelDescriptions !== null){
-                return this.props.state.channelState.channelDescriptions[id].isCentered
+        if(this.props.state.editedChannel.id !== null){
+            let value = this.props.state.editedChannel.centered;
+            if(value !== null){
+                return value
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    getEnabledCheckedState = () => {
+        if(this.props.state.editedChannel.id !== null){
+            let value = this.props.state.editedChannel.enabled;
+            if(value !== null){
+                return value
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    getFlippedCheckedState = () => {
+        if(this.props.state.editedChannel.id !== null){
+            let value = this.props.state.editedChannel.directionFlipped;
+            if(value !== null){
+                return value
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    getRightTurnCheckedState = () => {
+        if(this.props.state.editedChannel.id !== null){
+            let value = this.props.state.editedChannel.rightTurn;
+            if(value !== null){
+                return value
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    getLeftTurnCheckedState = () => {
+        if(this.props.state.editedChannel.id !== null){
+            let value = this.props.state.editedChannel.leftTurn;
+            if(value !== null){
+                return value
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    getBrakeCheckedState = () => {
+        if(this.props.state.editedChannel.id !== null){
+            let value = this.props.state.editedChannel.brake;
+            if(value !== null){
+                return value
+            }else{
+                return false;
+            }
+        }else{
+            return false;
+        }
+    }
+
+    getReverseCheckedState = () => {
+        if(this.props.state.editedChannel.id !== null){
+            let value = this.props.state.editedChannel.reverse;
+            if(value !== null){
+                return value
             }else{
                 return false;
             }
@@ -388,7 +333,7 @@ export class ChannelSelector extends Component {
     }
 
     showAddEditDescription = () => {
-        if(this.props.state.channelState.editedChannelDescription !== null){
+        if(this.props.state.editedChannel.id !== null){
             return <React.Fragment>
                 <div className="channelAddEditDiv">
                     <div className='row'>
@@ -403,6 +348,14 @@ export class ChannelSelector extends Component {
                                 <option value={5}>5</option>
                                 <option value={6}>6</option>
                                 <option value={7}>7</option>
+                                <option value={8}>8</option>
+                                <option value={9}>9</option>
+                                <option value={10}>10</option>
+                                <option value={11}>11</option>
+                                <option value={12}>12</option>
+                                <option value={13}>13</option>
+                                <option value={14}>14</option>
+                                <option value={15}>15</option>
                             </select>
                         </div>
                     </div>
@@ -448,13 +401,43 @@ export class ChannelSelector extends Component {
                         </div>
                     </div>
                     <div className='row'>
-                        <div className='column inlineColumn'>
+                        <div className='column inlineColumnLeft'>
+                            <input name="isEnabled" type="checkbox" checked={this.getEnabledCheckedState()} onChange={this.updateEnabled}/>
+                            <label>Enabled?</label>
+                        </div>
+                        <div className="column inlineColumnRight">
+                            <input name="isFlipped" type="checkbox" checked={this.getFlippedCheckedState()} onChange={this.updateFlipped}/>
+                            <label>Flipped?</label>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='column inlineColumnLeft'>
                             <input name="isInterior" type="checkbox" checked={this.getInteriorCheckedState()} onChange={this.updateInterior}/>
                             <label>In Interior?</label>
                         </div>
-                        <div className="column inlineColumn">
+                        <div className="column inlineColumnRight">
                             <input name="isCentered" type="checkbox" checked={this.getCenteredCheckedState()} onChange={this.updateCentered}/>
                             <label>Is Centered?</label>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='column inlineColumnLeft'>
+                            <input name="rightTurn" type="checkbox" checked={this.getRightTurnCheckedState()} onChange={this.updateRightTurn}/>
+                            <label>Right Signal?</label>
+                        </div>
+                        <div className="column inlineColumnRight">
+                            <input name="leftTurn" type="checkbox" checked={this.getLeftTurnCheckedState()} onChange={this.updateLeftTurn}/>
+                            <label>Left Signal?</label>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='column inlineColumnLeft'>
+                            <input name="brake" type="checkbox" checked={this.getBrakeCheckedState()} onChange={this.updateBrakeState}/>
+                            <label>Brake Signal?</label>
+                        </div>
+                        <div className="column inlineColumnRight">
+                            <input name="reverse" type="checkbox" checked={this.getReverseCheckedState()} onChange={this.updateReverseState}/>
+                            <label>Reverse Light?</label>
                         </div>
                     </div>
                     <div className="channelPositionDiv" >
@@ -493,20 +476,10 @@ export class ChannelSelector extends Component {
     render() {
         return (
             <div className="channelSelectorMainDiv">
-                <h3>Select Channels</h3>
+                <h3>Modify Channels</h3>
                 <div className="channelsDiv">
-                    <input className="channelButton channelInput" type="button" name="addEditChannels" value="Add/Edit Channels" onClick={this.addEditChannels}/>
+                    <input className="channelButton channelInput" type="button" name="addEditChannels" value="Toggle Channel Editor" onClick={this.addEditChannels}/>
                     {this.showAddEditDescription()}
-                    <div>
-                        <input disabled={this.getDisabledStatus(0)} className={this.getToggleStyle(0)} type="button" name="channel0" value={0} onClick={this.channelClicked}/>
-                        <input disabled={this.getDisabledStatus(1)} className={this.getToggleStyle(1)} type="button" name="channel1" value={1} onClick={this.channelClicked}/>
-                        <input disabled={this.getDisabledStatus(2)} className={this.getToggleStyle(2)} type="button" name="channel2" value={2} onClick={this.channelClicked}/>
-                        <input disabled={this.getDisabledStatus(3)} className={this.getToggleStyle(3)} type="button" name="channel3" value={3} onClick={this.channelClicked}/>
-                        <input disabled={this.getDisabledStatus(4)} className={this.getToggleStyle(4)} type="button" name="channel4" value={4} onClick={this.channelClicked}/>
-                        <input disabled={this.getDisabledStatus(5)} className={this.getToggleStyle(5)} type="button" name="channel5" value={5} onClick={this.channelClicked}/>
-                        <input disabled={this.getDisabledStatus(6)} className={this.getToggleStyle(6)} type="button" name="channel6" value={6} onClick={this.channelClicked}/>
-                        <input disabled={this.getDisabledStatus(7)} className={this.getToggleStyle(7)} type="button" name="channel7" value={7} onClick={this.channelClicked}/>
-                    </div>
                 </div>
             </div>
         )

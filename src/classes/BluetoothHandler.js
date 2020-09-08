@@ -6,7 +6,6 @@ export default class bluetootHandler {
     constructor(numChannels){
         this.serviceUUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
         this.charUUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
-        this.readBuffer = null;
         this.server = null;
         this.busy = false;
         this.animation = new Animation();
@@ -74,11 +73,11 @@ export default class bluetootHandler {
 
     parseBuffer = (data) => {
         //switches are first 6 bytes of data
-        let switchesData = data.buffer.slice(0,6);
-        let animationData = data.buffer.slice(6,16);
+        let switchesData = data.slice(0,6);
+        let animationData = data.slice(6,16);
         this.animation.parseBuffer(animationData);
 
-        let channelsData = data.buffer.slice(15);
+        let channelsData = data.slice(15);
         this.parseChannels(channelsData);
     }
 
@@ -111,7 +110,6 @@ export default class bluetootHandler {
                 let service = await this.server.getPrimaryService(this.serviceUUID);
                 let char = await service.getCharacteristic(this.charUUID);
                 let dataBuffer = this.getDataBuffer();
-                console.log("Write Buffer Length: "+dataBuffer.byteLength);
                 await char.writeValue(dataBuffer); //May not need await here
                 this.busy = false;
             }catch(error){
@@ -131,9 +129,7 @@ export default class bluetootHandler {
                 let service = await this.server.getPrimaryService(this.serviceUUID);
                 let char = await service.getCharacteristic(this.charUUID);
                 let data = await char.readValue();
-                this.readBuffer = data;
-                console.log("Read Buffer Length: "+data.byteLength);
-                this.parseBuffer(data);
+                this.parseBuffer(data.buffer);
                 this.busy = false;
             }catch(error){
                 this.disconnect()
@@ -146,13 +142,13 @@ export default class bluetootHandler {
     }
 
     parseChannels = (data) => {
-        let channelDataLength = 16;
+        let channelDataLength = 17;
         let startIndex = 0;
         let endIndex = channelDataLength;
         for(let i=0; i<this.channels.length; i++){
-            this.channels[i].parseBuffer(data.slice(startIndex, endIndex+1));
+            this.channels[i].parseBuffer(data.slice(startIndex, endIndex));
             startIndex = endIndex;
-            endIndex = channelDataLength * (i+1);
+            endIndex = startIndex+channelDataLength;
         }
     }
 
@@ -161,5 +157,20 @@ export default class bluetootHandler {
         tmp.set(new Uint8Array(buffer1), 0);
         tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
         return tmp.buffer;
-      };
+    };
+
+    compareBuffer = (buffer1, buffer2) => {
+        console.log("Buffer1 Length: "+buffer1.byteLength);
+        console.log("Buffer2 Length: "+buffer2.byteLength);
+        let viewer1 = new Uint8Array(buffer1);
+        let viewer2 = new Uint8Array(buffer2);
+
+        for(let i=0; i<viewer1.length; i++){
+            if(viewer1[i] !== viewer2[i]){
+                console.log("Difference starts at: "+i);
+                return false;
+            }
+        }
+        return true;
+    }
 }

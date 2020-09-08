@@ -17,7 +17,14 @@ class DeviceSelector extends Component {
       if(e.message.includes("User cancelled the requestDevice() chooser") === false){
         alert(e);
       }
+      this.props.stateUpdaters.update();
     }
+  }
+
+  setUIBusyForConnect = () => {
+    this.props.state.uiBusy = true;
+    this.props.state.doConnection = true;
+    this.props.stateUpdaters.update();
   }
 
   disconnect = async () => {
@@ -31,21 +38,27 @@ class DeviceSelector extends Component {
     //Placeholder event for bluetooth disconnection
   }
 
-  load = async () => {
+  read = async () => {
     if(this.props.state.bluetoothHandler.isAvailable()){
       try{
         console.log("Starting Bluetooth Read...");
         await this.props.state.bluetoothHandler.read();
         console.log("Finished Bluetooth Read.");
-        this.props.stateUpdaters.update();
       }catch(e){
         this.onDisconnected();
         alert(e);
       }
+      this.props.stateUpdaters.update();
     }
   }
 
-  save = async () => {
+  setUIBusyForRead = () => {
+    this.props.state.uiBusy = true;
+    this.props.state.doRead = true;
+    this.props.stateUpdaters.update();
+  }
+
+  write = async () => {
     if(this.props.state.bluetoothHandler.isAvailable()){
       try{
         console.log("Starting Bluetooth Write...");
@@ -56,6 +69,12 @@ class DeviceSelector extends Component {
         alert(e);
       }
     }
+  }
+
+  setUIBusyForWrite = () => {
+    this.props.state.uiBusy = true;
+    this.props.state.doWrite = true;
+    this.props.stateUpdaters.update();
   }
 
 /*  toggleLightStatus = async () => {
@@ -100,7 +119,7 @@ class DeviceSelector extends Component {
         borderColor: "green"
       }
     }
-    if(this.props.state.bluetoothHandler.isConnected()){
+    if(this.props.state.bluetoothHandler.isConnected() || this.props.state.uiBusy){
       return{
         borderColor: "yellow"
       }
@@ -117,7 +136,7 @@ class DeviceSelector extends Component {
         color: "green"
       }
     }
-    if(this.props.state.bluetoothHandler.isConnected()){
+    if(this.props.state.bluetoothHandler.isConnected() || this.props.state.uiBusy){
       return{
         color: "yellow"
       }
@@ -132,7 +151,7 @@ class DeviceSelector extends Component {
     if(this.props.state.bluetoothHandler.isAvailable()){
       return "Status: Connected";
     }
-    if(this.props.state.bluetoothHandler.isConnected()){
+    if(this.props.state.bluetoothHandler.isConnected() || this.props.state.uiBusy){
       return "Status: Busy...";
     }else{
       return "Disconnected";
@@ -163,7 +182,7 @@ class DeviceSelector extends Component {
   getLoadButton = () => {
     if(this.props.state.bluetoothHandler.isAvailable()){
       return <React.Fragment>
-        <button className="saveButton" onClick={this.load}>Load Settings</button>
+        <button className="saveButton" onClick={this.setUIBusyForRead}>Load Settings</button>
       </React.Fragment>
     }
   }
@@ -171,7 +190,7 @@ class DeviceSelector extends Component {
   getSaveButton = () => {
     if(this.props.state.bluetoothHandler.isAvailable()){
       return <React.Fragment>
-        <button className="saveButton" onClick={this.save}>Save Settings</button>
+        <button className="saveButton" onClick={this.setUIBusyForWrite}>Save Settings</button>
       </React.Fragment>
     }
   }
@@ -180,7 +199,7 @@ class DeviceSelector extends Component {
     return (
       <div className="selectorMainDiv" style = {this.getCurrentStatusBorderStyle()}>
         <h2>Device Selector</h2>
-        <button className="selectorButton" onClick={this.connect}>Connect Device</button>
+        <button className="selectorButton" onClick={this.setUIBusyForConnect}>Connect Device</button>
         <button className="selectorButton" onClick={this.disconnect}>Disconnect Device</button>
         <div className="selectorLabelDiv">
           <div>
@@ -201,7 +220,20 @@ class DeviceSelector extends Component {
   }
 
   componentDidUpdate = () => {
-    //load used to be here
+    if(this.props.state.uiBusy){
+      this.props.state.uiBusy = false;
+      
+      if(this.props.state.doConnection){
+        this.props.state.doConnection = false;
+        this.connect();
+      }else if(this.props.state.doRead){
+        this.props.state.doRead = false;
+        this.read();
+      }else if(this.props.state.doWrite){
+        this.props.state.doWrite = false;
+        this.write();
+      }
+    }
   }  
 }
 DeviceSelector.propTypes = {

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { SketchPicker, ChromePicker } from 'react-color';
+import { SketchPicker } from 'react-color';
 import { CirclePicker } from 'react-color';
 import './../css/ColorList.css';
 
