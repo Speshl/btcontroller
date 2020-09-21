@@ -45,7 +45,7 @@ export default class bluetootHandler {
     }
 
     disconnect = () => {
-        if(this.isConnected(this.server)){
+        if(this.server !== null){
             this.server.disconnect();
             this.server = null;
         }

@@ -34,8 +34,8 @@ class DeviceSelector extends Component {
     }
   }
 
-  onDisconnected = () => {
-    //Placeholder event for bluetooth disconnection
+  onDisconnected = async () => {
+    await this.disconnect()
   }
 
   read = async () => {
